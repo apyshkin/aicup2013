@@ -1,5 +1,3 @@
-import model.*;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -14,7 +12,7 @@ public final class MoveActionChecker extends ActionChecker {
     super(env);
   }
 
-  public boolean checkActionValidity(IActionParameters params, Trooper self)
+  public boolean checkActionValidity(IActionParameters params, TrooperModel self)
   {
     MoveActionParameters moveParams = (MoveActionParameters) params;
     if (countActionCost(self) > self.getActionPoints())
@@ -32,7 +30,7 @@ public final class MoveActionChecker extends ActionChecker {
   }
 
   @Override
-  public int countActionCost(Trooper self) {
+  public int countActionCost(TrooperModel self) {
     switch (self.getStance()) {
       case STANDING:
         return environment.getGame().getStandingMoveCost();

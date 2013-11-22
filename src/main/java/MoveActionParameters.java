@@ -13,7 +13,8 @@ public final class MoveActionParameters extends DestinationActionParameters {
     super(x, y);
   }
 
-  public MoveActionParameters(Trooper trooper, Direction direction) {
+  public MoveActionParameters(TrooperModel trooper, Direction direction) {
     super(trooper, direction);
   }
+
 }

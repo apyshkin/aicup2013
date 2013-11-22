@@ -7,6 +7,6 @@
  */
 interface ITrooperStrategy
 {
-  Action setActionUnderTactics(AttackTactics attackTactics);
-  Action setActionUnderTactics(PatrolTactics patrolTactics);
+  void setActionUnderTactics(AttackTactics attackTactics);
+  void setActionUnderTactics(PatrolTactics patrolTactics);
 }

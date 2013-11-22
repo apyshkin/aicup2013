@@ -9,7 +9,7 @@ import model.*;
  */
 public class MoveAction extends Action {
 
-  public MoveAction(Trooper self, Environment env)  {
+  public MoveAction(TrooperModel self, Environment env)  {
     super(ActionType.MOVE, new MoveActionChecker(env), self, env);
   }
 

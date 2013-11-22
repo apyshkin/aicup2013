@@ -1,4 +1,4 @@
-import model.Trooper;
+import model.Move;
 
 /**
  * Created with IntelliJ IDEA.
@@ -8,10 +8,14 @@ import model.Trooper;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class TrooperStrategyAdapter implements ITrooperStrategy {
-  protected final Trooper self;
+  protected Environment environment;
+  protected TrooperModel trooper;
+  protected final Move move;
 
-  protected TrooperStrategyAdapter(Trooper self) {
-    this.self = self;
+  protected TrooperStrategyAdapter(Environment environment, TrooperModel trooper, Move move) {
+    this.environment = environment;
+    this.trooper = trooper;
+    this.move = move;
   }
 
 }

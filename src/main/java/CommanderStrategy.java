@@ -1,8 +1,7 @@
+import javafx.util.Pair;
 import model.*;
 
 import java.util.ArrayList;
-
-import static java.lang.StrictMath.hypot;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,108 +12,104 @@ import static java.lang.StrictMath.hypot;
  */
 public class CommanderStrategy extends TrooperStrategyAdapter {
 
-  public CommanderStrategy(Trooper self) {
-    super(self);
+  public CommanderStrategy(Environment environment, TrooperModel self, Move move) {
+    super(environment, self, move);
   }
 
   @Override
-  public Action setActionUnderTactics(AttackTactics attackTactics) {
-    Trooper clone = Utils.copyOfTheTrooper(self);
+  public void setActionUnderTactics(AttackTactics tactics) {
+    CommanderActionsGenerator actionsGenerator = new CommanderActionsGenerator(environment);
+    final CellPriorities priorities = tactics.generateCellPriorities();
+    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
+    Pair<SimulatedAction, IActionParameters> pair = algorithmChooser.findBest();
+    SimulatedAction action = pair.getKey();
+    IActionParameters parameters = pair.getValue();
 
+    try {
+      action.actReal(parameters, trooper, move);
+    } catch (InvalidActionException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
-  public Action setActionUnderTactics(PatrolTactics patrolTactics) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  public void setActionUnderTactics(PatrolTactics tactics) {
+    CommanderActionsGenerator actionsGenerator = new CommanderActionsGenerator(environment);
+    final CellPriorities priorities = tactics.generateCellPriorities();
+    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
+    Pair<SimulatedAction, IActionParameters> pair = algorithmChooser.findBest();
+    SimulatedAction action = pair.getKey();
+    IActionParameters parameters = pair.getValue();
+    assert(action != null && parameters != null);
+
+    try {
+      action.actReal(parameters, trooper, move);
+    } catch (InvalidActionException e) {
+      e.printStackTrace();
+    }
   }
 
 }
 
-class CellPriorities {
-  private final Environment environment;
-  private int[][] cells;
-
-  public CellPriorities(Environment environment) {
-    this.environment = environment;
-    World world = environment.getWorld();
-    cells = new int[world.getWidth()][world.getHeight()];
-  }
-
-  public int getPriorityAtCell(int x, int y) {
-    return cells[x][y];
-  }
+interface IActionsGenerator {
+  public ArrayList<Pair<SimulatedAction, IActionParameters>> getActionsWithParameters(TrooperModel trooper);
 }
 
-class TrooperAlgorithmChooser {
+class CommanderActionsGenerator implements IActionsGenerator {
+  private Environment environment;
+  private ArrayList<MoveActionParameters> moveActionParameters = null;
+  private ArrayList<ShootActionParameters> shootActionParameters = null;
+  private ArrayList<Pair<SimulatedAction, IActionParameters>> actionsList = null;
 
-  private final Trooper trooper;
-  private final CellPriorities cellPriorities;
-  private final Environment environment;
-
-  public TrooperAlgorithmChooser(Trooper trooper, CellPriorities cellPriorities, Environment environment) {
-    this.trooper = trooper;
-    this.cellPriorities = cellPriorities;
+  public CommanderActionsGenerator(Environment environment) {
     this.environment = environment;
   }
 
-  ArrayList<Action> findBest() {
-    ArrayList<Action> result = new ArrayList<>();
-    int answer = 10000;
-    TrooperModel trooperModel = new TrooperModel(trooper);
-    answer = simulateMove(trooperModel, result, answer);
-
-    return result;
+  private TrooperModel[] getEnemies() {
+    return environment.getAllVisibleTroopers();
   }
 
-  private int simulateMove(TrooperModel trooper, ArrayList<Action> result, int answer) {
-    assert (trooper.getActionPoints() >= 0);
+  private void init(TrooperModel trooper) {
+    actionsList = new ArrayList<>();
+    moveActionParameters = new ArrayList<>();
+    shootActionParameters = new ArrayList<>();
+//    actionsList.add(new Pair<SimulatedAction, IActionParameters>(new RaiseStanceSimulatedAction(trooper, environment), new StanceActionParameters()));
+//    actionsList.add(new Pair<SimulatedAction, IActionParameters>(new LowerStanceSimulatedAction(trooper, environment), new StanceActionParameters()));
+    for (Direction direction : Direction.values()) {
+      if (direction == Direction.CURRENT_POINT)
+        continue;
 
-    Action shootAction = new ShootAction(trooper, environment);
-
-
-    return answer;  //To change body of created methods use File | Settings | File Templates.
+      MoveActionParameters moveActionParams = new MoveActionParameters(trooper, direction);
+      actionsList.add(new Pair<SimulatedAction, IActionParameters>(new MoveSimulatedAction(environment), moveActionParams));
+      moveActionParameters.add(moveActionParams);
+    }
+    for (TrooperModel enemy : getEnemies()) {
+      ShootActionParameters shootActionParams = new ShootActionParameters(enemy);
+      actionsList.add(new Pair<SimulatedAction, IActionParameters>(new ShootSimulatedAction(environment), shootActionParams));
+      shootActionParameters.add(shootActionParams);
+    }
   }
 
-//  private int simulateMove(int x, int y, int actionPoints, int stance, int[] actions,
-//                           int[] actionsAimX, int[] actionsAimY, int actionCount, int answer) {
-//    if (actionPoints < 0)
-//      assert(false);
-//    else if (actionPoints == 0)
-//      return answer;
-//
-//    final int stanceChangeCost = environment.getGame().getStanceChangeCost();
-//    int moveCost = countMoveCost(stance);
-//    int shootCost = countShootCost(stance);
-//    tryChangeStance(x, y, actionPoints, stance, actions, actionsAimX, actionsAimY, actionCount, answer);
-//  }
-//
-//  private void tryChangeStance(int x, int y, int actionPoints, int stance, int[] actions, int[] actionsAimX, int[] actionsAimY, int actionCount, int answer) {
-//    actions[answer++] = 0;
-//    if ()
-//    simulateMove(x, y, act)
-//  }
-//
-//  private final String[] actionMap = new String[] {
-//          "high",
-//          "low" ,
-//          "move",
-//          "shoot",
-//  };
+  @Override
+  public ArrayList<Pair<SimulatedAction, IActionParameters>> getActionsWithParameters(TrooperModel trooper) {
+    if (actionsList == null)
+      init(trooper);
 
-//  private int countShootCost(int stance) {
-//    assert(false);
-//    return 0;  //To change body of created methods use File | Settings | File Templates.
-//  }
-//
-//  private int countMoveCost(int stance) {
-//    switch (stance) {
-//      case 0: return environment.getGame().getProneMoveCost();
-//      case 1: return environment.getGame().getKneelingMoveCost();
-//      case 2: return environment.getGame().getStandingMoveCost();
-//      default: assert(false);
-//    }
-//    return -1;
-//  }
-//}
+    int i = 0;
+    for (Direction direction : Direction.values()) {
+      if (direction == Direction.CURRENT_POINT)
+        continue;
+
+      MoveActionParameters actionParameters = moveActionParameters.get(i++);
+      actionParameters.update(trooper, direction);
+    }
+    i = 0;
+    for (TrooperModel enemy : getEnemies()) {
+      ShootActionParameters actionParameters = shootActionParameters.get(i++);
+      actionParameters.update(enemy, Direction.CURRENT_POINT);
+    }
+
+    return actionsList;
+  }
 
 }

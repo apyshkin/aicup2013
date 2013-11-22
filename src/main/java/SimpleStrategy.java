@@ -15,8 +15,9 @@ public class SimpleStrategy implements Strategy {
   private BattleHistory history = new BattleHistory();
 
   @Override
-  public void move(Trooper self, World world, Game game, Move move) {
+  public void move(Trooper selfTrooper, World world, Game game, Move move) {
     try {
+      TrooperModel self = new TrooperModel(selfTrooper);
       updateEnvironment(world, game);
       updateHistory(currentEnvironment);
 
@@ -31,13 +32,13 @@ public class SimpleStrategy implements Strategy {
         Trooper[] troopers = world.getTroopers();
         ArrayList<Trooper> potentialAims = new ArrayList<>();
         for (Trooper trooper : troopers) {
-          boolean canShoot = shootAction.canAct(new ShootActionParameters(trooper));
+          boolean canShoot = shootAction.canAct(new ShootActionParameters(new TrooperModel(trooper)));
           if (canShoot) {
             potentialAims.add(trooper);
           }
         }
         for (Trooper trooper : potentialAims) {
-          shootAction.act(new ShootActionParameters(trooper), move);
+          shootAction.act(new ShootActionParameters(new TrooperModel(trooper)), move);
           return;
         }
       }
@@ -51,16 +52,12 @@ public class SimpleStrategy implements Strategy {
   }
 
   private void updateEnvironment(World world, Game game) {
-    if (currentEnvironment == null) {
-      Trooper[] troopers = world.getTroopers();
-      ArrayList<Trooper> myTroopers = new ArrayList<>();
-      for (Trooper trooper : troopers)
-        if (trooper.isTeammate())
-          myTroopers.add(trooper);
+    Trooper[] troopers = world.getTroopers();
+    ArrayList<TrooperModel> myTroopers = new ArrayList<>();
+    for (Trooper trooper : troopers)
+      if (trooper.isTeammate())
+        myTroopers.add(new TrooperModel(trooper));
 
-      currentEnvironment = new Environment(world, game, myTroopers.toArray(troopers));
-    }
-    else
-      currentEnvironment.update(world, game);
+    currentEnvironment = new Environment(world, game, myTroopers.toArray(new TrooperModel[0]));
   }
 }

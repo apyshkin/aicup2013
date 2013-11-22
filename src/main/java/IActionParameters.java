@@ -1,3 +1,5 @@
+import model.Direction;
+
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka

@@ -8,13 +8,13 @@ import model.*;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class Action {
-  protected final Trooper self;
+  protected final TrooperModel self;
   protected final Environment environment;
 
   private ActionType actionType = null;
   protected ActionChecker actionChecker = null;
 
-  protected Action(ActionType actionType, ActionChecker actionChecker, Trooper self, Environment env) {
+  protected Action(ActionType actionType, ActionChecker actionChecker, TrooperModel self, Environment env) {
     this.actionType = actionType;
     this.actionChecker = actionChecker;
     this.self = self;
@@ -25,7 +25,7 @@ public abstract class Action {
     move.setAction(actionType);
   }
 
-  protected boolean isValid(IActionParameters params, Trooper self) {
+  protected boolean isValid(IActionParameters params, TrooperModel self) {
     assert (actionChecker != null);
     return actionChecker.checkActionValidity(params, self);
   }

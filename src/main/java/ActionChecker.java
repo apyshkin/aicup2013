@@ -14,14 +14,14 @@ public abstract class ActionChecker {
     this.environment = environment;
   }
 
-  public abstract boolean checkActionValidity(IActionParameters params, Trooper self);
+  public abstract boolean checkActionValidity(IActionParameters params, TrooperModel self);
 
-  public abstract int countActionCost(Trooper self);
+  public abstract int countActionCost(TrooperModel self);
 
   protected boolean checkCellHasNoMen(int x, int y) {
-    Trooper[] troopers = environment.getAllVisibleTroopers();
-    for (Trooper tr : troopers)
-      if (tr.getX() == x && tr.getY() == y)
+    TrooperModel[] troopers = environment.getAllVisibleTroopers();
+    for (TrooperModel trooper : troopers)
+      if (trooper.getX() == x && trooper.getY() == y)
         return false;
     return true;
   }
@@ -38,7 +38,7 @@ public abstract class ActionChecker {
     return environment.cellIsWithinBoundaries(x, y);
   }
 
-  protected boolean checkEnemyIsVisible(Trooper self, Trooper enemyTrooper) {
+  protected boolean checkEnemyIsVisible(TrooperModel self, TrooperModel enemyTrooper) {
     return environment.enemyIsVisible(self, enemyTrooper);
   }
 }

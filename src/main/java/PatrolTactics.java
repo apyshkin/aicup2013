@@ -1,3 +1,5 @@
+import model.World;
+
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -12,7 +14,18 @@ public class PatrolTactics implements ITactics {
     this.environment = environment;
   }
   @Override
-  public Action setAction(ITrooperStrategy trooper) {
-    return trooper.setActionUnderTactics(this);
+  public void setAction(ITrooperStrategy trooper) {
+    trooper.setActionUnderTactics(this);
+  }
+
+  @Override
+  public CellPriorities generateCellPriorities() {
+    World world = environment.getWorld();
+    int[][] priorities = new int[world.getWidth()][world.getHeight()];
+    for (int i = 0; i < world.getWidth(); ++i)
+      for (int j = 0; j < world.getHeight(); ++j)
+        priorities[i][j] = i + j;
+
+    return new CellPriorities(environment, priorities);
   }
 }

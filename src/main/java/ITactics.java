@@ -6,5 +6,6 @@
  * To change this template use File | Settings | File Templates.
  */
 interface ITactics {
-  Action setAction(ITrooperStrategy trooper);
+  void setAction(ITrooperStrategy trooper);
+  CellPriorities generateCellPriorities();
 }

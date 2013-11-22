@@ -9,14 +9,14 @@ import model.Trooper;
  */
 public final class ShootActionParameters extends DestinationActionParameters {
 
-  private Trooper enemyTrooper;
+  private TrooperModel enemyTrooper;
 
-  public ShootActionParameters(Trooper enemy) {
+  public ShootActionParameters(TrooperModel enemy) {
     super(enemy.getX(), enemy.getY());
     enemyTrooper = enemy;
   }
 
-  public Trooper getEnemyTrooper() {
+  public TrooperModel getEnemyTrooper() {
     return enemyTrooper;
   }
 }

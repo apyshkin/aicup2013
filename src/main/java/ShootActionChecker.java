@@ -13,7 +13,7 @@ public class ShootActionChecker extends ActionChecker {
   }
 
   @Override
-  public boolean checkActionValidity(IActionParameters params, Trooper self) {
+  public boolean checkActionValidity(IActionParameters params, TrooperModel self) {
     ShootActionParameters shootParams = (ShootActionParameters) params;
 
     if (countActionCost(self) > self.getActionPoints())
@@ -24,12 +24,12 @@ public class ShootActionChecker extends ActionChecker {
     return true;
   }
 
-  private boolean canShootAtCell(Trooper self, Trooper enemyTrooper) {
+  private boolean canShootAtCell(TrooperModel self, TrooperModel enemyTrooper) {
     return checkEnemyIsVisible(self, enemyTrooper) && !enemyTrooper.isTeammate();
   }
 
   @Override
-  public int countActionCost(Trooper self) {
+  public int countActionCost(TrooperModel self) {
     return self.getShootCost();
   }
 }

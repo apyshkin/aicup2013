@@ -60,6 +60,14 @@ public class TrooperModel extends UnitModel {
             trooper.getDamage(), trooper.isHoldingGrenade(), trooper.isHoldingMedikit(), trooper.isHoldingFieldRation());
   }
 
+  public TrooperModel(TrooperModel trooper) {
+    this(trooper.getPlayerId(), trooper.getX(), trooper.getY(), trooper.getPlayerId(), trooper.getTeammateIndex(),
+            trooper.isTeammate(), trooper.getType(), trooper.getStance(), trooper.getHitpoints(), trooper.getMaximalHitpoints(),
+            trooper.getActionPoints(), trooper.getInitialActionPoints(), trooper.getVisionRange(), trooper.getShootingRange(),
+            trooper.getShootCost(), trooper.getStandingDamage(), trooper.getKneelingDamage(), trooper.getProneDamage(),
+            trooper.getDamage(), trooper.isHoldingGrenade(), trooper.isHoldingMedkit(), trooper.isHoldingFieldRation());
+  }
+
   public long getPlayerId() {
     return playerId;
   }
@@ -80,8 +88,16 @@ public class TrooperModel extends UnitModel {
     return stance;
   }
 
+  public void setStance(TrooperStance stance) {
+    this.stance = stance;
+  }
+
   public int getHitpoints() {
     return hitpoints;
+  }
+
+  public void setHitpoints(int hp) {
+    hitpoints = hp;
   }
 
   public int getMaximalHitpoints() {
@@ -90,6 +106,10 @@ public class TrooperModel extends UnitModel {
 
   public int getActionPoints() {
     return actionPoints;
+  }
+
+  public void setActionPoints(int ap) {
+    actionPoints = ap;
   }
 
   public int getInitialActionPoints() {
@@ -147,5 +167,31 @@ public class TrooperModel extends UnitModel {
 
   public boolean isHoldingFieldRation() {
     return holdingFieldRation;
+  }
+
+  public void lowStance() {
+    switch (stance) {
+      case KNEELING:
+        stance = TrooperStance.PRONE;
+        break;
+      case STANDING:
+        stance = TrooperStance.KNEELING;
+        break;
+    }
+  }
+
+  public void raiseStance() {
+    switch (stance) {
+      case KNEELING:
+        stance = TrooperStance.STANDING;
+        break;
+      case PRONE:
+        stance = TrooperStance.KNEELING;
+        break;
+    }
+  }
+
+  public String toString() {
+    return "trooper " + getType() + " " + getX() + " " + getY();
   }
 }

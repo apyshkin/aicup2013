@@ -1,3 +1,4 @@
+import model.Move;
 import model.Trooper;
 
 /**
@@ -9,17 +10,15 @@ import model.Trooper;
  */
 class MedicStrategy extends TrooperStrategyAdapter {
 
-  public MedicStrategy(Trooper self) {
-    super(self);
+  protected MedicStrategy(Environment environment, TrooperModel self, Move move) {
+    super(environment, self, move);
   }
 
   @Override
-  public Action setActionUnderTactics(AttackTactics attackTactics) {
-    return null;
+  public void setActionUnderTactics(AttackTactics attackTactics) {
   }
 
   @Override
-  public Action setActionUnderTactics(PatrolTactics patrolTactics) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  public void setActionUnderTactics(PatrolTactics patrolTactics) {
   }
 }

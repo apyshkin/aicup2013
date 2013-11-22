@@ -11,33 +11,38 @@ import java.util.ArrayList;
  */
 public class DefenseStrategy implements Strategy {
 
-  private Environment currentEnvironment = null;
   private BattleHistory battleHistory = new BattleHistory();
 
   @Override
   public void move(Trooper self, World world, Game game, Move move) {
     try {
-      updateEnvironment(world, game);
+      Environment currentEnvironment = createEnvironment(world, game);
       updateHistory(currentEnvironment);
       Analyzer analyzer = new Analyzer(currentEnvironment);
       ITactics chosenTactics = analyzer.chooseTactics(battleHistory);
-      setAction(self, chosenTactics);
+      setAction(currentEnvironment.clone(), self, chosenTactics, move); // clone is important
 
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  private Action setAction(Trooper self, ITactics chosenTactics) throws InvalidTrooperTypeException {
-    switch (self.getType()) {
+  private void setAction(Environment environment, Trooper self, ITactics chosenTactics, Move move) throws InvalidTrooperTypeException {
+    TrooperModel selfCopy = new TrooperModel(self);
+    switch (selfCopy.getType()) {
       case COMMANDER:
-        return chosenTactics.setAction(new CommanderStrategy(self));
+        chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
+        break;
       case SOLDIER:
-        return chosenTactics.setAction(new SoldierStrategy(self));
+        chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
+        break;
+//        chosenTactics.setAction(new SoldierStrategy(environment, selfCopy, move));
       case FIELD_MEDIC:
-        return chosenTactics.setAction(new MedicStrategy(self));
+        chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
+        break;
+//        chosenTactics.setAction(new MedicStrategy(environment, selfCopy, move));
       default:
-        throw new InvalidTrooperTypeException(self.getType().toString());
+        throw new InvalidTrooperTypeException(selfCopy.getType().toString());
     }
   }
 
@@ -45,18 +50,14 @@ public class DefenseStrategy implements Strategy {
     battleHistory.add(environment);
   }
 
-  private void updateEnvironment(World world, Game game) {
-    if (currentEnvironment == null) {
-      Trooper[] troopers = world.getTroopers();
-      ArrayList<Trooper> myTroopers = new ArrayList<>();
-      for (Trooper trooper : troopers)
-        if (trooper.isTeammate())
-          myTroopers.add(trooper);
+  private Environment createEnvironment(World world, Game game) {
+    Trooper[] troopers = world.getTroopers();
+    ArrayList<TrooperModel> myTroopers = new ArrayList<>();
+    for (Trooper trooper : troopers)
+      if (trooper.isTeammate()) //todo do better
+        myTroopers.add(new TrooperModel(trooper));
 
-      currentEnvironment = new Environment(world, game, myTroopers.toArray(troopers));
-    }
-    else
-      currentEnvironment.update(world, game);
+    return new Environment(world, game, myTroopers.toArray(new TrooperModel[0]));
   }
 }
 

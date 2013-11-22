@@ -9,7 +9,7 @@ import model.*;
  */
 public class RaiseStanceAction extends Action {
 
-  public RaiseStanceAction(Trooper self, Environment env) {
+  public RaiseStanceAction(TrooperModel self, Environment env) {
     super(ActionType.RAISE_STANCE, new RaiseStanceActionChecker(env), self, env);
   }
 
@@ -24,7 +24,7 @@ class RaiseStanceActionChecker extends ActionChecker {
   }
 
   @Override
-  public boolean checkActionValidity(IActionParameters params, Trooper self) {
+  public boolean checkActionValidity(IActionParameters params, TrooperModel self) {
     if (countActionCost(self) > self.getActionPoints())
       return false;
     if (self.getStance() == TrooperStance.STANDING)
@@ -34,7 +34,8 @@ class RaiseStanceActionChecker extends ActionChecker {
   }
 
   @Override
-  public int countActionCost(Trooper self) {
+  public int countActionCost(TrooperModel self) {
     return environment.getGame().getStanceChangeCost();
   }
 }
+

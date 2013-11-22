@@ -9,7 +9,7 @@ import model.*;
  */
 public class HealAction extends Action {
 
-  public HealAction(Trooper self, Environment env) {
+  public HealAction(TrooperModel self, Environment env) {
     super(ActionType.HEAL, new HealActionChecker(env), self, env);
     assert(self.getType() == TrooperType.FIELD_MEDIC);
   }

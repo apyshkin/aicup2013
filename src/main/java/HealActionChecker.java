@@ -1,4 +1,3 @@
-import model.Trooper;
 import model.TrooperType;
 
 public class HealActionChecker extends ActionChecker {
@@ -7,7 +6,7 @@ public class HealActionChecker extends ActionChecker {
   }
 
   @Override
-  public boolean checkActionValidity(IActionParameters params, Trooper self) {
+  public boolean checkActionValidity(IActionParameters params, TrooperModel self) {
     MoveActionParameters moveParams = (MoveActionParameters) params;
     if (self.getType() != TrooperType.FIELD_MEDIC)
       return false;
@@ -28,7 +27,7 @@ public class HealActionChecker extends ActionChecker {
   }
 
   @Override
-  public int countActionCost(Trooper self) {
+  public int countActionCost(TrooperModel self) {
     return environment.getGame().getFieldMedicHealCost();
   }
 }

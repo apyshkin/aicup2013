@@ -26,11 +26,11 @@ public class Utils {
             game.getGrenadeCollateralDamage(), game.getMedikitUseCost(), game.getMedikitBonusHitpoints(), game.getMedikitHealSelfBonusHitpoints(), game.getFieldRationEatCost(), game.getFieldRationBonusActionPoints());
   }
 
-  public static Trooper copyOfTheTrooper(Trooper trooper) {
-    return new Trooper(trooper.getPlayerId(), trooper.getX(), trooper.getY(), trooper.getPlayerId(), trooper.getTeammateIndex(),
+  public static TrooperModel copyOfTheTrooper(TrooperModel trooper) {
+    return new TrooperModel(trooper.getPlayerId(), trooper.getX(), trooper.getY(), trooper.getPlayerId(), trooper.getTeammateIndex(),
             trooper.isTeammate(), trooper.getType(), trooper.getStance(), trooper.getHitpoints(), trooper.getMaximalHitpoints(),
             trooper.getActionPoints(), trooper.getInitialActionPoints(), trooper.getVisionRange(), trooper.getShootingRange(),
             trooper.getShootCost(), trooper.getStandingDamage(), trooper.getKneelingDamage(), trooper.getProneDamage(),
-            trooper.getDamage(), trooper.isHoldingGrenade(), trooper.isHoldingMedikit(), trooper.isHoldingFieldRation());
+            trooper.getDamage(), trooper.isHoldingGrenade(), trooper.isHoldingMedkit(), trooper.isHoldingFieldRation());
   }
 }

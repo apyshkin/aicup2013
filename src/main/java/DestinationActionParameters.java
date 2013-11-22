@@ -15,12 +15,20 @@ public class DestinationActionParameters implements IActionParameters {
 
   public DestinationActionParameters(int x, int y)
   {
+    update(x, y);
+  }
+
+  public DestinationActionParameters(TrooperModel trooper, Direction direction)
+  {
+    update(trooper, direction);
+  }
+
+  public void update(int x, int y) {
     setX(x);
     setY(y);
   }
 
-  public DestinationActionParameters(Trooper trooper, Direction direction)
-  {
+  public void update(TrooperModel trooper, Direction direction) {
     setX(trooper.getX() + direction.getOffsetX());
     setY(trooper.getY() + direction.getOffsetY());
   }
@@ -40,5 +48,9 @@ public class DestinationActionParameters implements IActionParameters {
 
   public void setY(int y) {
     this.y = y;
+  }
+
+  public String toString() {
+    return "dest " + x + " " + y;
   }
 }

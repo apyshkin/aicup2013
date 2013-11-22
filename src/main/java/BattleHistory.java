@@ -15,7 +15,7 @@ public class BattleHistory {
   }
 
   public void add(Environment environment) {
-    history.add(new Environment(environment));
+    history.add(environment);
   }
 
   public Environment get(int index) {

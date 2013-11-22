@@ -14,8 +14,13 @@ public class AttackTactics implements ITactics {
   }
 
   @Override
-  public Action setAction(ITrooperStrategy trooper) {
-    return trooper.setActionUnderTactics(this);
+  public void setAction(ITrooperStrategy trooper) {
+    trooper.setActionUnderTactics(this);
+  }
+
+  @Override
+  public CellPriorities generateCellPriorities() {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
   }
 }
 
