@@ -1,8 +1,4 @@
-package strategy.actions;
-
-import model.Game;
 import model.Trooper;
-import model.World;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,8 +8,8 @@ import model.World;
  * To change this template use File | Settings | File Templates.
  */
 public class ShootActionChecker extends ActionChecker {
-  public ShootActionChecker(Game game, World world) {
-    super(game, world);
+  public ShootActionChecker(Environment environment) {
+    super(environment);
   }
 
   @Override
@@ -29,12 +25,7 @@ public class ShootActionChecker extends ActionChecker {
   }
 
   private boolean canShootAtCell(Trooper self, Trooper enemyTrooper) {
-    return CellIsVisible(self, enemyTrooper) && !enemyTrooper.isTeammate();
-  }
-
-  private boolean CellIsVisible(Trooper self, Trooper enemyTrooper) {
-    return world.isVisible(self.getShootingRange(), self.getX(), self.getY(), self.getStance(),
-            enemyTrooper.getX(), enemyTrooper.getY(), enemyTrooper.getStance());
+    return checkEnemyIsVisible(self, enemyTrooper) && !enemyTrooper.isTeammate();
   }
 
   @Override

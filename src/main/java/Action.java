@@ -1,7 +1,4 @@
-package strategy.actions;
-
 import model.*;
-import strategy.exceptions.InvalidActionException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,18 +9,16 @@ import strategy.exceptions.InvalidActionException;
  */
 public abstract class Action {
   protected final Trooper self;
-  protected final World world;
-  protected final Game game;
+  protected final Environment environment;
 
   private ActionType actionType = null;
   protected ActionChecker actionChecker = null;
 
-  protected Action(ActionType actionType, ActionChecker actionChecker, Trooper self, World world, Game game) {
+  protected Action(ActionType actionType, ActionChecker actionChecker, Trooper self, Environment env) {
     this.actionType = actionType;
     this.actionChecker = actionChecker;
     this.self = self;
-    this.world = world;
-    this.game = game;
+    this.environment = env;
   }
 
   private void setActionType(Move move) {
@@ -48,6 +43,10 @@ public abstract class Action {
 
   public int cost() {
     return actionChecker.countActionCost(self);
+  }
+
+  public boolean hasEnoughAP() {
+    return cost() <= self.getActionPoints();
   }
 
   public boolean canAct(IActionParameters params) {

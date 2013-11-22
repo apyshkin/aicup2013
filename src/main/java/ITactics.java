@@ -1,11 +1,10 @@
-package strategy.actions;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
  * Date: 11/21/13
- * Time: 4:43 AM
+ * Time: 10:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface IActionParameters {
+interface ITactics {
+  Action setAction(ITrooperStrategy trooper);
 }

@@ -1,5 +1,3 @@
-package strategy.actions;
-
 import model.*;
 
 /**
@@ -11,8 +9,8 @@ import model.*;
  */
 public class LowerStanceAction extends Action {
 
-  public LowerStanceAction(Trooper self, World world, Game game) {
-    super(ActionType.LOWER_STANCE, new LowerStanceActionChecker(game, world), self, world, game);
+  public LowerStanceAction(Trooper self, Environment environment) {
+    super(ActionType.LOWER_STANCE, new LowerStanceActionChecker(environment), self, environment);
   }
 
   @Override
@@ -21,8 +19,8 @@ public class LowerStanceAction extends Action {
 }
 
 class LowerStanceActionChecker extends ActionChecker {
-  public LowerStanceActionChecker(Game game, World world) {
-    super(game, world);
+  public LowerStanceActionChecker(Environment environment) {
+    super(environment);
   }
 
   @Override
@@ -37,6 +35,6 @@ class LowerStanceActionChecker extends ActionChecker {
 
   @Override
   public int countActionCost(Trooper self) {
-    return game.getStanceChangeCost();
+    return environment.getGame().getStanceChangeCost();
   }
 }

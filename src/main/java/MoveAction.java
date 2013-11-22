@@ -1,5 +1,3 @@
-package strategy.actions;
-
 import model.*;
 
 /**
@@ -11,8 +9,8 @@ import model.*;
  */
 public class MoveAction extends Action {
 
-  protected MoveAction(Trooper self, World world, Game game) {
-    super(ActionType.MOVE, new MoveActionChecker(game, world), self, world, game);
+  public MoveAction(Trooper self, Environment env)  {
+    super(ActionType.MOVE, new MoveActionChecker(env), self, env);
   }
 
   @Override

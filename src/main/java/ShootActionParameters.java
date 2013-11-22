@@ -1,5 +1,3 @@
-package strategy.actions;
-
 import model.Trooper;
 
 /**

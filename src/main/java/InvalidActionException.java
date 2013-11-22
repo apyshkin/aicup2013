@@ -1,5 +1,3 @@
-package strategy.exceptions;
-
 import model.ActionType;
 
 /**
@@ -10,13 +8,11 @@ import model.ActionType;
  * To change this template use File | Settings | File Templates.
  */
 public class InvalidActionException extends Exception {
-  ActionType actionType;
   public InvalidActionException(ActionType actionType) {
-    this.actionType = actionType;
+    super(actionType.toString());
   }
 
-  @Override
-  public String getMessage() {
-    return "InvalidActionException thrown, trying to perform " + actionType;
+  public InvalidActionException() {
+    super();
   }
 }

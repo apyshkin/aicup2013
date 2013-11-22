@@ -9,45 +9,40 @@ import java.util.ArrayList;
  * Time: 1:48 AM
  * To change this template use File | Settings | File Templates.
  */
-public class SimpleStrategy implements Strategy {
+public class DefenseStrategy implements Strategy {
 
   private Environment currentEnvironment = null;
-  private BattleHistory history = new BattleHistory();
+  private BattleHistory battleHistory = new BattleHistory();
 
   @Override
   public void move(Trooper self, World world, Game game, Move move) {
     try {
       updateEnvironment(world, game);
       updateHistory(currentEnvironment);
+      Analyzer analyzer = new Analyzer(currentEnvironment);
+      ITactics chosenTactics = analyzer.chooseTactics(battleHistory);
+      setAction(self, chosenTactics);
 
-      if (self.getStance() != TrooperStance.KNEELING) {
-        LowerStanceAction action = new LowerStanceAction(self, currentEnvironment);
-        action.act(null, move);
-        return;
-      }
-
-      ShootAction shootAction = new ShootAction(self, currentEnvironment);
-      if (shootAction.hasEnoughAP()) {
-        Trooper[] troopers = world.getTroopers();
-        ArrayList<Trooper> potentialAims = new ArrayList<>();
-        for (Trooper trooper : troopers) {
-          boolean canShoot = shootAction.canAct(new ShootActionParameters(trooper));
-          if (canShoot) {
-            potentialAims.add(trooper);
-          }
-        }
-        for (Trooper trooper : potentialAims) {
-          shootAction.act(new ShootActionParameters(trooper), move);
-          return;
-        }
-      }
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
+  private Action setAction(Trooper self, ITactics chosenTactics) throws InvalidTrooperTypeException {
+    switch (self.getType()) {
+      case COMMANDER:
+        return chosenTactics.setAction(new CommanderStrategy(self));
+      case SOLDIER:
+        return chosenTactics.setAction(new SoldierStrategy(self));
+      case FIELD_MEDIC:
+        return chosenTactics.setAction(new MedicStrategy(self));
+      default:
+        throw new InvalidTrooperTypeException(self.getType().toString());
+    }
+  }
+
   private void updateHistory(Environment environment) {
-    history.add(environment);
+    battleHistory.add(environment);
   }
 
   private void updateEnvironment(World world, Game game) {
@@ -64,3 +59,4 @@ public class SimpleStrategy implements Strategy {
       currentEnvironment.update(world, game);
   }
 }
+

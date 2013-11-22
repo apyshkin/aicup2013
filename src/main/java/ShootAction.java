@@ -1,5 +1,3 @@
-package strategy.actions;
-
 import model.*;
 
 /**
@@ -10,8 +8,8 @@ import model.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ShootAction extends Action {
-  public ShootAction(Trooper self, World world, Game game) {
-    super(ActionType.SHOOT, new ShootActionChecker(game, world), self, world, game);
+  public ShootAction(TrooperModel self, Environment environment) {
+    super(ActionType.SHOOT, new ShootActionChecker(environment), self, environment);
   }
 
   @Override
