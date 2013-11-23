@@ -1,6 +1,6 @@
 import model.*;
 
-class LowerStanceActionChecker extends ActionChecker {
+public class LowerStanceActionChecker extends ActionChecker {
   public LowerStanceActionChecker(Environment environment) {
     super(environment);
   }

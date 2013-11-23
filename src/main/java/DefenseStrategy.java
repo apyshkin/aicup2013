@@ -69,4 +69,3 @@ public class DefenseStrategy implements Strategy {
     return new Environment(battleMap, world, game, myTroopers.toArray(new TrooperModel[0]), currentTime);
   }
 }
-
