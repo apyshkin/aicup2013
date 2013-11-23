@@ -1,5 +1,5 @@
-import javafx.util.Pair;
-import model.*;
+import model.Direction;
+import model.Move;
 
 import java.util.ArrayList;
 
@@ -112,4 +112,22 @@ class CommanderActionsGenerator implements IActionsGenerator {
     return actionsList;
   }
 
+}
+
+class Pair<K, V> {
+  K k;
+  V v;
+
+  public Pair(K k, V v) {
+    this.k = k;
+    this.v = v;
+  }
+
+  public K getKey() {
+    return k;
+  }
+
+  public V getValue() {
+    return v;
+  }
 }

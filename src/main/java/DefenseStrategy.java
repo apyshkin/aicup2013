@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * Time: 1:48 AM
  * To change this template use File | Settings | File Templates.
  */
-public class DefenseStrategy implements Strategy {
+public final class DefenseStrategy implements Strategy {
 
   private static BattleHistory battleHistory = new BattleHistory();
   private static BattleMap battleMap = null;

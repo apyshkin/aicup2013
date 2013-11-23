@@ -1,6 +1,4 @@
-import javafx.util.Pair;
 import model.TrooperType;
-
 import java.util.ArrayList;
 
 public class TrooperAlgorithmChooser {
@@ -85,10 +83,7 @@ public class TrooperAlgorithmChooser {
     return -1;
   }
 
-
   private int countPotential(TrooperType myTrooperType, int x, int y) {
-
-
     return cellPriorities.getPriorityAtCell(x, y)
             + CellFunctions.GlueTogetherFunction(myTrooperType, environment.getMyTroopers());
   }
