@@ -20,8 +20,14 @@ public class ShootActionChecker extends ActionChecker {
       return false;
     if (!canShootAtCell(self, shootParams.getEnemyTrooper()))
       return false;
+    if (!enemyIsAlive(shootParams.getEnemyTrooper()))
+      return false;
 
     return true;
+  }
+
+  private boolean enemyIsAlive(TrooperModel enemy) {
+    return enemy.getHitpoints() > 0;
   }
 
   private boolean canShootAtCell(TrooperModel self, TrooperModel enemyTrooper) {

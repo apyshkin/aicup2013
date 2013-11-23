@@ -28,7 +28,7 @@ public class TrooperModel extends UnitModel {
           int teammateIndex, boolean teammate, TrooperType type, TrooperStance stance,
           int hitpoints, int maximalHitpoints, int actionPoints, int initialActionPoints,
           double visionRange, double shootingRange, int shootCost,
-          int standingDamage, int kneelingDamage, int proneDamage, int damage,
+          int standingDamage, int kneelingDamage, int proneDamage,
           boolean holdingGrenade, boolean holdingMedkit, boolean holdingFieldRation) {
     super(id, x, y);
     this.playerId = playerId;
@@ -57,7 +57,7 @@ public class TrooperModel extends UnitModel {
             trooper.isTeammate(), trooper.getType(), trooper.getStance(), trooper.getHitpoints(), trooper.getMaximalHitpoints(),
             trooper.getActionPoints(), trooper.getInitialActionPoints(), trooper.getVisionRange(), trooper.getShootingRange(),
             trooper.getShootCost(), trooper.getStandingDamage(), trooper.getKneelingDamage(), trooper.getProneDamage(),
-            trooper.getDamage(), trooper.isHoldingGrenade(), trooper.isHoldingMedikit(), trooper.isHoldingFieldRation());
+            trooper.isHoldingGrenade(), trooper.isHoldingMedikit(), trooper.isHoldingFieldRation());
   }
 
   public TrooperModel(TrooperModel trooper) {
@@ -65,7 +65,7 @@ public class TrooperModel extends UnitModel {
             trooper.isTeammate(), trooper.getType(), trooper.getStance(), trooper.getHitpoints(), trooper.getMaximalHitpoints(),
             trooper.getActionPoints(), trooper.getInitialActionPoints(), trooper.getVisionRange(), trooper.getShootingRange(),
             trooper.getShootCost(), trooper.getStandingDamage(), trooper.getKneelingDamage(), trooper.getProneDamage(),
-            trooper.getDamage(), trooper.isHoldingGrenade(), trooper.isHoldingMedkit(), trooper.isHoldingFieldRation());
+            trooper.isHoldingGrenade(), trooper.isHoldingMedkit(), trooper.isHoldingFieldRation());
   }
 
   public long getPlayerId() {
@@ -154,7 +154,7 @@ public class TrooperModel extends UnitModel {
   }
 
   public int getDamage() {
-    return damage;
+    return getDamage(stance);
   }
 
   public boolean isHoldingGrenade() {
@@ -192,6 +192,6 @@ public class TrooperModel extends UnitModel {
   }
 
   public String toString() {
-    return "trooper " + getType() + " " + getX() + " " + getY();
+    return "trooper " + getType() + " " + getX() + " " + getY() + " ap " + getActionPoints();
   }
 }

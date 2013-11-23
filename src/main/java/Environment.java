@@ -1,7 +1,4 @@
-import model.CellType;
-import model.Game;
-import model.Trooper;
-import model.World;
+import model.*;
 
 import java.util.ArrayList;
 
@@ -13,32 +10,22 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public final class Environment implements Cloneable {
+  private BattleMap battleMap;
+
   private final World world;
   private final Game game;
   private final TrooperModel[] myTroopers;
   private TrooperModel[] visibleTroopers;
 
-  public Environment(World world, Game game, TrooperModel[] myTroopers) {
+  private final int currentTime;
+
+
+  public Environment(BattleMap battleMap, World world, Game game, TrooperModel[] myTroopers, int currentTime) {
+    this.battleMap = battleMap;
     this.myTroopers = myTroopers;
     this.world = world;
     this.game = game;
-  }
-
-  public Game getGame() {
-    return game;
-  }
-
-  public TrooperModel[] getAllVisibleTroopers() {
-    if (this.visibleTroopers != null)
-      return this.visibleTroopers;
-
-    Trooper[] troopers = world.getTroopers();
-    ArrayList<TrooperModel> visibleTroopers = new ArrayList<>();
-    for (Trooper trooper : troopers)
-      if (!trooper.isTeammate())
-        visibleTroopers.add(new TrooperModel(trooper));
-    this.visibleTroopers = visibleTroopers.toArray(new TrooperModel[0]);
-    return this.visibleTroopers;
+    this.currentTime = currentTime;
   }
 
   public boolean cellIsWithinBoundaries(int x, int y) {
@@ -62,6 +49,17 @@ public final class Environment implements Cloneable {
             enemyTrooper.getX(), enemyTrooper.getY(), enemyTrooper.getStance());
   }
 
+  public Environment clone() {
+    World worldClone = Utils.copyOfTheWorld(world);
+    TrooperModel[] troopers = new TrooperModel[myTroopers.length];
+    System.arraycopy(myTroopers, 0, troopers, 0, myTroopers.length);
+    return new Environment(battleMap, worldClone, game, troopers, currentTime);
+  }
+
+  public BattleMap getBattleMap() {
+    return battleMap;
+  }
+
   public TrooperModel[] getMyTroopers() {
     return myTroopers;
   }
@@ -70,10 +68,33 @@ public final class Environment implements Cloneable {
     return world;
   }
 
-  public Environment clone() {
-    World worldClone = Utils.copyOfTheWorld(world);
-    TrooperModel[] troopers = new TrooperModel[myTroopers.length];
-    System.arraycopy(myTroopers, 0, troopers, 0, myTroopers.length);
-    return new Environment(worldClone, game, troopers);
+  public Game getGame() {
+    return game;
+  }
+
+  public int getCurrentTime() {
+    return currentTime;
+  }
+
+  public TrooperModel[] getAllVisibleTroopers() {
+    if (this.visibleTroopers != null)
+      return this.visibleTroopers;
+
+    Trooper[] troopers = world.getTroopers();
+    ArrayList<TrooperModel> visibleTroopers = new ArrayList<>();
+    for (Trooper trooper : troopers)
+      visibleTroopers.add(new TrooperModel(trooper));
+    this.visibleTroopers = visibleTroopers.toArray(new TrooperModel[0]);
+    return this.visibleTroopers;
+  }
+
+
+  public int getCellNotVisitTime(int x, int y) {
+    Cell cell = battleMap.getCell(x, y);
+    return currentTime - cell.timeOfLastVisit;
+  }
+
+  public void visitCell(int x, int y) {
+    battleMap.visitCell(x, y, currentTime);
   }
 }

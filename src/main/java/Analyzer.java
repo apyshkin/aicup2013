@@ -16,11 +16,19 @@ public class Analyzer {
   }
 
   public ITactics chooseTactics(BattleHistory battleHistory) {
-    if (wasAttackedSinceLastMove(battleHistory)) {
-      return new AttackTactics(currentEnvironment);
+    if (canSeeTheEnemy() || wasAttackedSinceLastMove(battleHistory)) {
+      return new PatrolTactics(currentEnvironment);
     }
     else
       return new PatrolTactics(currentEnvironment);
+  }
+
+  private boolean canSeeTheEnemy() {
+    for (TrooperModel trooper : currentEnvironment.getAllVisibleTroopers())
+      if (!trooper.isTeammate())
+        return true;
+
+    return false;  //To change body of created methods use File | Settings | File Templates.
   }
 
   private boolean wasAttackedSinceLastMove(BattleHistory battleHistory) {

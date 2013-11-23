@@ -11,12 +11,16 @@ import java.util.ArrayList;
  */
 public class DefenseStrategy implements Strategy {
 
-  private BattleHistory battleHistory = new BattleHistory();
+  private static BattleHistory battleHistory = new BattleHistory();
+  private static BattleMap battleMap = null;
+  private static int currentTime = 0;
 
   @Override
   public void move(Trooper self, World world, Game game, Move move) {
+    ++currentTime;
+    initBattleMap(world);
     try {
-      Environment currentEnvironment = createEnvironment(world, game);
+      Environment currentEnvironment = createEnvironment(world, game, currentTime);
       updateHistory(currentEnvironment);
       Analyzer analyzer = new Analyzer(currentEnvironment);
       ITactics chosenTactics = analyzer.chooseTactics(battleHistory);
@@ -25,6 +29,11 @@ public class DefenseStrategy implements Strategy {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private void initBattleMap(World world) {
+    if (battleMap == null)
+      battleMap = new BattleMap(world);
   }
 
   private void setAction(Environment environment, Trooper self, ITactics chosenTactics, Move move) throws InvalidTrooperTypeException {
@@ -50,14 +59,14 @@ public class DefenseStrategy implements Strategy {
     battleHistory.add(environment);
   }
 
-  private Environment createEnvironment(World world, Game game) {
+  private Environment createEnvironment(World world, Game game, int currentTime) {
     Trooper[] troopers = world.getTroopers();
     ArrayList<TrooperModel> myTroopers = new ArrayList<>();
     for (Trooper trooper : troopers)
       if (trooper.isTeammate()) //todo do better
         myTroopers.add(new TrooperModel(trooper));
 
-    return new Environment(world, game, myTroopers.toArray(new TrooperModel[0]));
+    return new Environment(battleMap, world, game, myTroopers.toArray(new TrooperModel[0]), currentTime);
   }
 }
 

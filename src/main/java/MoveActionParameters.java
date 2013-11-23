@@ -9,12 +9,14 @@ import model.Trooper;
  * To change this template use File | Settings | File Templates.
  */
 public final class MoveActionParameters extends DestinationActionParameters {
-  public MoveActionParameters(int x, int y) {
-    super(x, y);
-  }
-
+  private Direction direction;
   public MoveActionParameters(TrooperModel trooper, Direction direction) {
     super(trooper, direction);
+    this.direction = direction;
+  }
+
+  Direction getDirection() {
+    return direction;
   }
 
 }

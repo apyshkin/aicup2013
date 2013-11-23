@@ -19,4 +19,8 @@ public final class ShootActionParameters extends DestinationActionParameters {
   public TrooperModel getEnemyTrooper() {
     return enemyTrooper;
   }
+
+  public String toString() {
+    return "SHOOT AT " + super.toString();
+  }
 }
