@@ -85,8 +85,9 @@ public final class Environment implements Cloneable {
     return (x == x1) && (y == y1);
   }
 
-  public boolean cellIsWithinBoundaries(int x, int y) { if (x < 0 || x >= world.getWidth())
-    return false;
+  public boolean cellIsWithinBoundaries(int x, int y) {
+    if (x < 0 || x >= world.getWidth())
+      return false;
     if (y < 0 || y >= world.getHeight())
       return false;
     return true;

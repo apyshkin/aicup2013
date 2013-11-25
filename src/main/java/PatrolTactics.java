@@ -59,23 +59,20 @@ class CellFunctions {
     return cellNotVisitTime;
   }
 
-  public static int GlueTogetherFunction(TrooperType myTrooperType, TrooperModel[] myTroopers) {
-    double maxDistance = 0;
-    for (TrooperModel trooper1 : myTroopers)
-      for (TrooperModel trooper2 : myTroopers) {
-        maxDistance = Math.max(maxDistance, trooper1.getDistanceTo(trooper2));
-      }
+  public static int GlueTogetherFunction(TrooperType myTrooperType, int maxDistance) {
 
     int points = 0;
-    if (maxDistance > 3)
-      points = -(int) (2 * maxDistance);
-    else if (maxDistance > 2)
+    if (maxDistance > 8)
+      points = 20 - (maxDistance);
+    else if (maxDistance >= 5)
       points = 30;
-    else if (maxDistance <= 1.5)
-      points = 15;
+    else if (maxDistance < 2)
+      points = 25;
 
-//    if (myTrooperType == TrooperType.COMMANDER)
-//      points /= 1.2;
+    if (myTrooperType == TrooperType.COMMANDER)
+      points /= 2;
+    else if (myTrooperType == TrooperType.FIELD_MEDIC)
+      points *= 2;
 
     return points;
   }

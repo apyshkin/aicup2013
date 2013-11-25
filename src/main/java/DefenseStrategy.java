@@ -49,6 +49,9 @@ public final class DefenseStrategy implements Strategy {
       case FIELD_MEDIC:
         chosenTactics.setAction(new MedicStrategy(environment, selfCopy, move));
         break;
+      case SNIPER:
+        chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
+        break;
       default:
         throw new InvalidTrooperTypeException(selfCopy.getType().toString());
     }

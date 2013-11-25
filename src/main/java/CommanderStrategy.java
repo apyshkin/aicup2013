@@ -18,7 +18,9 @@ public class CommanderStrategy extends TrooperStrategyAdapter {
   private void setAction(ITactics tactics) {
     CommanderActionsGenerator actionsGenerator = new CommanderActionsGenerator(environment);
     final CellPriorities priorities = tactics.generateCellPriorities(trooper);
-    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
+    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper,
+            priorities, actionsGenerator);
+
     Pair<Action, IActionParameters> pair = algorithmChooser.findBest();
     Action action = pair.getKey();
     IActionParameters parameters = pair.getValue();
@@ -42,10 +44,6 @@ public class CommanderStrategy extends TrooperStrategyAdapter {
   public void setActionUnderTactics(PatrolTactics tactics) {
     setAction(tactics);
   }
-}
-
-interface IActionsGenerator {
-  public ArrayList<Pair<Action, IActionParameters>> updateActionParametersWithTrooper(TrooperModel trooper);
 }
 
 class CommanderActionsGenerator extends TrooperActionsGenerator {

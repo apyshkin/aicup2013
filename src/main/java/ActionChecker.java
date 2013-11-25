@@ -1,5 +1,3 @@
-import model.Trooper;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka

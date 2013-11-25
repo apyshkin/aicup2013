@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="java-cgdk">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/java-cgdk.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

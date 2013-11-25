@@ -40,9 +40,11 @@ public final class Runner {
             while ((playerContext = remoteProcessClient.readPlayerContext()) != null) {
                 Trooper playerTrooper = playerContext.getTrooper();
 
+                double millis = System.currentTimeMillis();
                 Move move = new Move();
                 strategies[playerTrooper.getTeammateIndex()].move(playerTrooper, playerContext.getWorld(), game, move);
                 remoteProcessClient.writeMove(move);
+                System.out.println("time for move " + (System.currentTimeMillis() - millis));
             }
         } finally {
             remoteProcessClient.close();

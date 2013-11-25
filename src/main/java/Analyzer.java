@@ -28,7 +28,7 @@ public class Analyzer {
       if (!trooper.isTeammate())
         return true;
 
-    return false;  //To change body of created methods use File | Settings | File Templates.
+    return false;
   }
 
   private boolean wasAttackedSinceLastMove(BattleHistory battleHistory) {

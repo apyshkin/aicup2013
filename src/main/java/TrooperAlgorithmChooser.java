@@ -6,6 +6,7 @@ public class TrooperAlgorithmChooser {
   private final CellPriorities cellPriorities;
   private final Environment environment;
   private final IActionsGenerator actionsGenerator;
+
   // for dfs
   private int bestAnswer = -INFINITY;
   private Action bestAction;
@@ -25,7 +26,6 @@ public class TrooperAlgorithmChooser {
     } catch (InvalidActionException e) {
       e.printStackTrace();
     }
-
     return new Pair<>(bestAction, bestActionParameters);
   }
 
@@ -51,7 +51,6 @@ public class TrooperAlgorithmChooser {
 
     if (!wasAction) {
       maxPoints = points + countPotential(trooper);
-//      System.out.println("Reached " + points + " points");
       if (maxPoints > bestAnswer) {
         bestAnswer = maxPoints;
       }
@@ -84,8 +83,14 @@ public class TrooperAlgorithmChooser {
   }
 
   private int countPotential(TrooperModel trooper) {
+    BattleMap battleMap = environment.getBattleMap();
+    TrooperModel[] myTroopers = environment.getMyTroopers();
+    int maxDistance = 0;
+    for (TrooperModel trooper1 : myTroopers)
+        maxDistance = Math.max(maxDistance, battleMap.getDistance(trooper, trooper1));
+
     return cellPriorities.getPriorityAtCell(trooper.getX(), trooper.getY())
-            + CellFunctions.GlueTogetherFunction(trooper.getType(), environment.getMyTroopers());
+            + CellFunctions.GlueTogetherFunction(trooper.getType(), maxDistance);
   }
 
 }

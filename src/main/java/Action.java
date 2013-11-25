@@ -13,10 +13,10 @@ public abstract class Action {
   private final ActionChecker actionChecker;
   private final ActionType actionType;
 
-  protected Action(ActionType actionType, ActionChecker actionChecker, Environment env) {
+  protected Action(ActionType actionType, ActionChecker actionChecker, Environment environment) {
     this.actionType = actionType;
     this.actionChecker = actionChecker;
-    this.environment = env;
+    this.environment = environment;
   }
 
   private void setActionType(Move move) {

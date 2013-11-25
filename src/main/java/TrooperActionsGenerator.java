@@ -1,24 +1,5 @@
 import model.Direction;
-
 import java.util.ArrayList;
-
-class Pair<K, V> {
-  K k;
-  V v;
-
-  public Pair(K k, V v) {
-    this.k = k;
-    this.v = v;
-  }
-
-  public K getKey() {
-    return k;
-  }
-
-  public V getValue() {
-    return v;
-  }
-}
 
 public class TrooperActionsGenerator implements IActionsGenerator {
   protected Environment environment;
@@ -65,13 +46,6 @@ public class TrooperActionsGenerator implements IActionsGenerator {
       MoveActionParameters actionParameters = moveActionParameters.get(i++);
       actionParameters.update(trooper, direction);
     }
-//    i = 0;
-//    for (TrooperModel enemy : environment.getAllVisibleTroopers())
-//      if (!enemy.isTeammate()) {
-//        ShootActionParameters actionParameters = shootActionParameters.get(i++);
-//        actionParameters.update(trooper.getX(), trooper.getY());
-//      }
-
     return actionsList;
   }
 }
