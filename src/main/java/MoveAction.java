@@ -9,22 +9,22 @@ import model.Move;
  * Time: 4:54 AM
  * To change this template use File | Settings | File Templates.
  */
-public class MoveSimAction extends SimAction {
+public class MoveAction extends Action {
 
-  public MoveSimAction(Environment env) {
+  public MoveAction(Environment env) {
     super(ActionType.MOVE, new MoveActionChecker(env), env);
   }
 
   @Override
-  protected int innerAct(IActionParameters params, TrooperModel self) {
+  protected int innerActSimulating(IActionParameters params, TrooperModel trooper) {
     MoveActionParameters moveParams = (MoveActionParameters) params;
-    self.setX(moveParams.getX());
-    self.setY(moveParams.getY());
+    trooper.setX(moveParams.getX());
+    trooper.setY(moveParams.getY());
     return 0;
   }
 
   @Override
-  protected void innerActForReal(IActionParameters params, TrooperModel self, Move move) {
+  protected void innerAct(IActionParameters params, TrooperModel trooper, Move move) {
     MoveActionParameters moveParams = (MoveActionParameters) params;
     final int x = moveParams.getX();
     final int y = moveParams.getY();
@@ -34,11 +34,10 @@ public class MoveSimAction extends SimAction {
   }
 
   @Override
-  public void reset(IActionParameters params, TrooperModel trooper) {
-    trooper.setActionPoints(trooper.getActionPoints() + cost(trooper));
+  public void innerUndoActSimulating(IActionParameters params, TrooperModel trooper) {
     MoveActionParameters moveParams = (MoveActionParameters) params;
     Direction direction = moveParams.getDirection();
-    trooper.setX(moveParams.getX() - direction.getOffsetX());
-    trooper.setY(moveParams.getY() - direction.getOffsetY());
+    trooper.setX(trooper.getX() - direction.getOffsetX());
+    trooper.setY(trooper.getY() - direction.getOffsetY());
   }
 }

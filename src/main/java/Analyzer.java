@@ -17,7 +17,7 @@ public class Analyzer {
 
   public ITactics chooseTactics(BattleHistory battleHistory) {
     if (canSeeTheEnemy() || wasAttackedSinceLastMove(battleHistory)) {
-      return new PatrolTactics(currentEnvironment);
+      return new AttackTactics(currentEnvironment);
     }
     else
       return new PatrolTactics(currentEnvironment);

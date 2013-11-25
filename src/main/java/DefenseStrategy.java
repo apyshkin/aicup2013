@@ -47,9 +47,8 @@ public final class DefenseStrategy implements Strategy {
         break;
 //        chosenTactics.setAction(new SoldierStrategy(environment, selfCopy, move));
       case FIELD_MEDIC:
-        chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
+        chosenTactics.setAction(new MedicStrategy(environment, selfCopy, move));
         break;
-//        chosenTactics.setAction(new MedicStrategy(environment, selfCopy, move));
       default:
         throw new InvalidTrooperTypeException(selfCopy.getType().toString());
     }
@@ -59,11 +58,12 @@ public final class DefenseStrategy implements Strategy {
     battleHistory.add(environment);
   }
 
+
   private Environment createEnvironment(World world, Game game, int currentTime) {
     Trooper[] troopers = world.getTroopers();
     ArrayList<TrooperModel> myTroopers = new ArrayList<>();
     for (Trooper trooper : troopers)
-      if (trooper.isTeammate()) //todo do better
+      if (trooper.isTeammate())
         myTroopers.add(new TrooperModel(trooper));
 
     return new Environment(battleMap, world, game, myTroopers.toArray(new TrooperModel[0]), currentTime);

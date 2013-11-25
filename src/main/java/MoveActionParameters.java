@@ -10,8 +10,10 @@ import model.Trooper;
  */
 public final class MoveActionParameters extends DestinationActionParameters {
   private Direction direction;
+
   public MoveActionParameters(TrooperModel trooper, Direction direction) {
     super(trooper, direction);
+    assert(direction != Direction.CURRENT_POINT);
     this.direction = direction;
   }
 

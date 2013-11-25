@@ -1,23 +1,21 @@
-import model.*;
+import model.ActionType;
+import model.Move;
 
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
- * Date: 11/21/13
- * Time: 1:29 AM
+ * Date: 11/22/13
+ * Time: 4:52 AM
  * To change this template use File | Settings | File Templates.
  */
 public abstract class Action {
-  protected final TrooperModel self;
   protected final Environment environment;
+  private final ActionChecker actionChecker;
+  private final ActionType actionType;
 
-  private ActionType actionType = null;
-  protected ActionChecker actionChecker = null;
-
-  protected Action(ActionType actionType, ActionChecker actionChecker, TrooperModel self, Environment env) {
+  protected Action(ActionType actionType, ActionChecker actionChecker, Environment env) {
     this.actionType = actionType;
     this.actionChecker = actionChecker;
-    this.self = self;
     this.environment = env;
   }
 
@@ -25,31 +23,51 @@ public abstract class Action {
     move.setAction(actionType);
   }
 
-  protected boolean isValid(IActionParameters params, TrooperModel self) {
+  protected boolean isValid(IActionParameters params, TrooperModel trooper) {
     assert (actionChecker != null);
-    return actionChecker.checkActionValidity(params, self);
+    return actionChecker.checkActionValidity(params, trooper);
   }
 
-  protected abstract void innerAct(IActionParameters params, Move move);
+  protected abstract int innerActSimulating(IActionParameters params, TrooperModel trooper);
 
-  public void act(IActionParameters params, Move move) throws InvalidActionException {
-    if (!isValid(params, self))
+  public int actSimulating(IActionParameters params, TrooperModel trooper) throws InvalidActionException {
+    if (!isValid(params, trooper))
       throw new InvalidActionException(actionType);
     else {
-      setActionType(move);
-      innerAct(params, move);
+      trooper.setActionPoints(trooper.getActionPoints() - cost(trooper));
+      int actionPoints = innerActSimulating(params, trooper);
+      assert(actionPoints >= 0);
+      return actionPoints;
     }
   }
 
-  public int cost() {
-    return actionChecker.countActionCost(self);
+  protected abstract void innerUndoActSimulating(IActionParameters actionParameters, TrooperModel trooper);
+
+  public void undoActSimulating(IActionParameters actionParameters, TrooperModel trooper) {
+    trooper.setActionPoints(trooper.getActionPoints() + cost(trooper));
+    innerUndoActSimulating(actionParameters, trooper);
   }
 
-  public boolean hasEnoughAP() {
-    return cost() <= self.getActionPoints();
+  public int cost(TrooperModel trooper) {
+    return actionChecker.countActionCost(trooper);
   }
 
-  public boolean canAct(IActionParameters params) {
-    return actionChecker.checkActionValidity(params, self);
+  public boolean hasEnoughAP(TrooperModel trooper) {
+    return cost(trooper) <= trooper.getActionPoints();
   }
+
+  public boolean canAct(IActionParameters params, TrooperModel trooper) {
+    return actionChecker.checkActionValidity(params, trooper);
+  }
+
+  public void act(IActionParameters params, TrooperModel trooper, Move move) throws InvalidActionException {
+    if (!isValid(params, trooper))
+      throw new InvalidActionException(actionType);
+    else {
+      setActionType(move);
+      innerAct(params, trooper, move);
+    }
+  }
+
+  protected abstract void innerAct(IActionParameters params, TrooperModel trooper, Move move);
 }

@@ -22,12 +22,12 @@ public class SimpleStrategy implements Strategy {
       updateHistory(currentEnvironment);
 
       if (self.getStance() != TrooperStance.KNEELING) {
-        LowerStanceSimAction action = new LowerStanceSimAction(currentEnvironment);
-        action.actReal(null, self, move);
+        LowerStanceAction action = new LowerStanceAction(currentEnvironment);
+        action.act(null, self, move);
         return;
       }
 
-      ShootSimAction shootAction = new ShootSimAction(currentEnvironment);
+      ShootAction shootAction = new ShootAction(currentEnvironment);
       if (shootAction.hasEnoughAP(self)) {
         Trooper[] troopers = world.getTroopers();
         ArrayList<Trooper> potentialAims = new ArrayList<>();
@@ -38,7 +38,7 @@ public class SimpleStrategy implements Strategy {
           }
         }
         for (Trooper trooper : potentialAims) {
-          shootAction.actReal(new ShootActionParameters(new TrooperModel(trooper)), self, move);
+          shootAction.act(new ShootActionParameters(new TrooperModel(trooper)), self, move);
           return;
         }
       }

@@ -12,14 +12,14 @@ public final class MoveActionChecker extends ActionChecker {
     super(env);
   }
 
-  public boolean checkActionValidity(IActionParameters params, TrooperModel self)
+  public boolean checkActionValidity(IActionParameters params, TrooperModel trooper)
   {
     MoveActionParameters moveParams = (MoveActionParameters) params;
-    if (countActionCost(self) > self.getActionPoints())
+    if (countActionCost(trooper) > trooper.getActionPoints())
       return false;
     if (!checkCellIsWithinBoundaries(moveParams.getX(), moveParams.getY()))
       return false;
-    if (!checkCellsAreNeighbours(moveParams.getX(), moveParams.getY(), self.getX(), self.getY()))
+    if (!checkCellsAreNeighbours(moveParams.getX(), moveParams.getY(), trooper.getX(), trooper.getY()))
       return false;
     if (!checkCellIsFree(moveParams.getX(), moveParams.getY()))
       return false;

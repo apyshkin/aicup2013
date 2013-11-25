@@ -6,24 +6,31 @@ public class HealActionChecker extends ActionChecker {
   }
 
   @Override
-  public boolean checkActionValidity(IActionParameters params, TrooperModel self) {
-    MoveActionParameters moveParams = (MoveActionParameters) params;
-    if (self.getType() != TrooperType.FIELD_MEDIC)
+  public boolean checkActionValidity(IActionParameters params, TrooperModel healer) {
+    HealActionParameters healParams = (HealActionParameters) params;
+    TrooperModel patient = healParams.getPatient();
+    if (healer.getType() != TrooperType.FIELD_MEDIC)
       return false;
-    if (countActionCost(self) > self.getActionPoints())
+    if (countActionCost(healer) > healer.getActionPoints())
       return false;
-    if (!checkCellIsWithinBoundaries(moveParams.getX(), moveParams.getY()))
+    if (!checkCellIsWithinBoundaries(patient.getX(), patient.getY()))
       return false;
-    if (!checkCellsAreNeighboursOrTheSame(moveParams.getX(), moveParams.getY(), self.getX(), self.getY()))
+    if (!checkCellsAreNeighboursOrTheSame(patient.getX(), patient.getY(), healer.getX(), healer.getY()))
       return false;
-    if (checkCellHasNoMen(moveParams.getX(), moveParams.getY()))
+    if (healer.getPlayerId() != patient.getPlayerId())
+      return false;
+    if (checkHitPointsAreMax(patient))
       return false;
 
     return true;
   }
 
+  private boolean checkHitPointsAreMax(TrooperModel trooper) {
+    return (trooper.getHitpoints() == trooper.getMaximalHitpoints());
+  }
+
   private boolean checkCellsAreNeighboursOrTheSame(int x, int y, int x1, int y1) {
-    return checkCellsAreNeighbours(x, y, x1, y1) || (x == x1 && y == y1);
+    return checkCellsAreNeighbours(x, y, x1, y1) || checkCellsAreTheSame(x, y, x1, y1);
   }
 
   @Override

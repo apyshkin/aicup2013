@@ -191,6 +191,17 @@ public class TrooperModel extends UnitModel {
     }
   }
 
+  @Override
+  public boolean equals(Object object) {
+    assert (object instanceof TrooperModel);
+    TrooperModel another = (TrooperModel) object;
+    return  getX() == another.getX() && getY() == another.getY() && type == another.type && stance == another.stance &&
+            hitpoints == another.hitpoints && playerId == another.playerId && actionPoints == another.actionPoints &&
+            holdingFieldRation == another.holdingFieldRation && holdingGrenade == another.holdingGrenade &&
+            holdingMedkit == another.holdingMedkit;
+  }
+
+  @Override
   public String toString() {
     return "trooper " + getType() + " " + getX() + " " + getY() + " ap " + getActionPoints();
   }

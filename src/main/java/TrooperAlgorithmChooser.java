@@ -1,18 +1,16 @@
-import model.TrooperType;
 import java.util.ArrayList;
 
 public class TrooperAlgorithmChooser {
-  private TrooperModel trooper;
+  public static final int INFINITY = 10000;
+  private final TrooperModel trooper;
   private final CellPriorities cellPriorities;
   private final Environment environment;
   private final IActionsGenerator actionsGenerator;
-
-
-  private TrooperModel trooperCopy;
-  private int bestAnswer;
-  private SimAction bestAction;
+  // for dfs
+  private int bestAnswer = -INFINITY;
+  private Action bestAction;
   private IActionParameters bestActionParameters;
-
+  private boolean wasAction;
 
   public TrooperAlgorithmChooser(Environment environment, TrooperModel trooper, CellPriorities cellPriorities, IActionsGenerator actionsGenerator) {
     this.environment = environment;
@@ -21,7 +19,7 @@ public class TrooperAlgorithmChooser {
     this.actionsGenerator = actionsGenerator;
   }
 
-  Pair<SimAction, IActionParameters> findBest() {
+  Pair<Action, IActionParameters> findBest() {
     try {
       simulateMove(trooper, 0, true);
     } catch (InvalidActionException e) {
@@ -32,60 +30,62 @@ public class TrooperAlgorithmChooser {
   }
 
   private int simulateMove(TrooperModel trooper, int points, boolean firstRun) throws InvalidActionException {
-    assert(trooper.getActionPoints() >= 0);
-    boolean wasAction = false;
+    assert (trooper.getActionPoints() >= 0);
+    wasAction = false;
 
-    int maxPoints = -1;
+    int maxPoints = -INFINITY;
     if (trooper.getActionPoints() > 0) {
       TrooperModel trooperCopy = new TrooperModel(trooper);
-      ArrayList<Pair<SimAction, IActionParameters>> listOfActions =
-              actionsGenerator.getActionsWithParameters(trooperCopy);
-      for (Pair<SimAction, IActionParameters> pair : listOfActions) {
+      ArrayList<Pair<Action, IActionParameters>> listOfActions =
+              actionsGenerator.updateActionParametersWithTrooper(trooper);
+      for (Pair<Action, IActionParameters> pair : listOfActions) {
 //        System.out.println("Trooper is here " + trooperCopy);
-        SimAction currentAction = pair.getKey();
+        Action currentAction = pair.getKey();
         IActionParameters actionParameters = pair.getValue();
 //        System.out.println("Trying " + currentAction + " " + actionParameters);
-        int possiblePoints = actIfCan(trooperCopy, currentAction, actionParameters, points, firstRun);
-        if (possiblePoints >= 0) {
-          wasAction = true;
-          actionsGenerator.getActionsWithParameters(trooper);
-          currentAction.reset(actionParameters, trooperCopy);
-          assert(trooperCopy.getX() == trooper.getX() && trooper.getY() == trooperCopy.getY() &&
-                  trooperCopy.getActionPoints() == trooper.getActionPoints());
-        }
+        int possiblePoints = actIfCan(currentAction, actionParameters, points, firstRun);
         maxPoints = Math.max(maxPoints, possiblePoints);
+        assert (trooper.equals(trooperCopy));
       }
     }
 
     if (!wasAction) {
-      points += countPotential(trooper.getType(), trooper.getX(), trooper.getY());
+      maxPoints = points + countPotential(trooper);
 //      System.out.println("Reached " + points + " points");
-      if (points > bestAnswer) {
-        bestAnswer = points;
+      if (maxPoints > bestAnswer) {
+        bestAnswer = maxPoints;
       }
-      return points;
     }
+//      System.out.println("Reached " + points + " points");
+    wasAction = true;
     return maxPoints;
   }
 
-  // returns possible points we can gain going down this branch
-  private int actIfCan(TrooperModel trooper, SimAction action, IActionParameters actionParameters, int points, boolean firstRun) throws InvalidActionException {
+  // returns possible total points we can gain going down this branch
+  private int actIfCan(Action action, IActionParameters actionParameters, int points, boolean firstRun) throws InvalidActionException {
     if (action.canAct(actionParameters, trooper)) {
-      int pointsForAction = action.act(actionParameters, trooper);
-      int res = simulateMove(trooper, points + pointsForAction, false);
-      if (firstRun && bestAnswer == res) {
-        bestAction = action;
-        bestActionParameters = actionParameters;
-        System.out.println("Found the best first move " + bestAction + " " + bestActionParameters + " with " + bestAnswer);
-      }
-      return res;
+      int pointsForAction = action.actSimulating(actionParameters, trooper);
+//      System.out.println("best is " + bestAnswer);
+      int pointsAtThisBranch = simulateMove(trooper, points + pointsForAction, false);
+      assert (bestAnswer >= pointsAtThisBranch);
+      if (firstRun && bestAnswer == pointsAtThisBranch)
+        updateBest(action, actionParameters);
+      action.undoActSimulating(actionParameters, trooper);
+      actionsGenerator.updateActionParametersWithTrooper(trooper);
+      return pointsAtThisBranch;
     }
-    return -1;
+    return -INFINITY;
   }
 
-  private int countPotential(TrooperType myTrooperType, int x, int y) {
-    return cellPriorities.getPriorityAtCell(x, y)
-            + CellFunctions.GlueTogetherFunction(myTrooperType, environment.getMyTroopers());
+  private void updateBest(Action action, IActionParameters actionParameters) {
+    bestAction = action;
+    bestActionParameters = actionParameters;
+//    System.out.println("Found the best first move " + bestAction + " " + bestActionParameters + " with " + bestAnswer);
+  }
+
+  private int countPotential(TrooperModel trooper) {
+    return cellPriorities.getPriorityAtCell(trooper.getX(), trooper.getY())
+            + CellFunctions.GlueTogetherFunction(trooper.getType(), environment.getMyTroopers());
   }
 
 }

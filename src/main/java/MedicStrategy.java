@@ -10,15 +10,52 @@ import model.Trooper;
  */
 class MedicStrategy extends TrooperStrategyAdapter {
 
-  protected MedicStrategy(Environment environment, TrooperModel self, Move move) {
+  public MedicStrategy(Environment environment, TrooperModel self, Move move) {
     super(environment, self, move);
   }
 
-  @Override
-  public void setActionUnderTactics(AttackTactics attackTactics) {
+  private void setAction(ITactics tactics) {
+    HealerActionsGenerator actionsGenerator = new HealerActionsGenerator(environment);
+    final CellPriorities priorities = tactics.generateCellPriorities(trooper);
+    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
+    Pair<Action, IActionParameters> pair = algorithmChooser.findBest();
+    Action action = pair.getKey();
+    IActionParameters parameters = pair.getValue();
+    assert(trooper.getActionPoints() < 2 || (action != null && parameters != null));
+    if (action == null)
+      return;
+
+    try {
+      action.act(parameters, trooper, move);
+    } catch (InvalidActionException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
-  public void setActionUnderTactics(PatrolTactics patrolTactics) {
+  public void setActionUnderTactics(AttackTactics tactics) {
+    setAction(tactics);
   }
+
+  @Override
+  public void setActionUnderTactics(PatrolTactics tactics) {
+    setAction(tactics);
+  }
+}
+
+class HealerActionsGenerator extends TrooperActionsGenerator {
+  public HealerActionsGenerator(Environment environment) {
+    super(environment);
+  }
+
+  protected void init(TrooperModel healer) {
+    super.init(healer);
+
+    for (TrooperModel patient : environment.getAllVisibleTroopers())
+      if (patient.isTeammate()) {
+        HealActionParameters healActionParams = new HealActionParameters(patient);
+        actionsList.add(new Pair<Action, IActionParameters>(new HealAction(environment), healActionParams));
+      }
+  }
+
 }

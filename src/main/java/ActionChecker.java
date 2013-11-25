@@ -14,7 +14,7 @@ public abstract class ActionChecker {
     this.environment = environment;
   }
 
-  public abstract boolean checkActionValidity(IActionParameters params, TrooperModel self);
+  public abstract boolean checkActionValidity(IActionParameters params, TrooperModel trooper);
 
   public abstract int countActionCost(TrooperModel self);
 
@@ -32,6 +32,10 @@ public abstract class ActionChecker {
 
   protected boolean checkCellsAreNeighbours(int x, int y, int x1, int y1) {
     return environment.cellsAreNeighbours(x, y, x1, y1);
+  }
+
+  protected boolean checkCellsAreTheSame(int x, int y, int x1, int y1) {
+    return environment.cellsAreTheSame(x, y, x1, y1);
   }
 
   protected boolean checkCellIsWithinBoundaries(int x, int y) {

@@ -1,3 +1,5 @@
+import model.Trooper;
+
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -7,5 +9,5 @@
  */
 interface ITactics {
   void setAction(ITrooperStrategy trooper);
-  CellPriorities generateCellPriorities();
+  CellPriorities generateCellPriorities(TrooperModel trooper);
 }

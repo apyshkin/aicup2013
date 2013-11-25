@@ -6,10 +6,10 @@ public class RaiseStanceActionChecker extends ActionChecker {
   }
 
   @Override
-  public boolean checkActionValidity(IActionParameters params, TrooperModel self) {
-    if (countActionCost(self) > self.getActionPoints())
+  public boolean checkActionValidity(IActionParameters params, TrooperModel trooper) {
+    if (countActionCost(trooper) > trooper.getActionPoints())
       return false;
-    if (self.getStance() == TrooperStance.STANDING)
+    if (trooper.getStance() == TrooperStance.STANDING)
       return false;
 
     return true;

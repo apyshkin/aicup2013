@@ -13,12 +13,12 @@ public class ShootActionChecker extends ActionChecker {
   }
 
   @Override
-  public boolean checkActionValidity(IActionParameters params, TrooperModel self) {
+  public boolean checkActionValidity(IActionParameters params, TrooperModel trooper) {
     ShootActionParameters shootParams = (ShootActionParameters) params;
 
-    if (countActionCost(self) > self.getActionPoints())
+    if (countActionCost(trooper) > trooper.getActionPoints())
       return false;
-    if (!canShootAtCell(self, shootParams.getEnemyTrooper()))
+    if (!canShootAtCell(trooper, shootParams.getEnemyTrooper()))
       return false;
     if (!enemyIsAlive(shootParams.getEnemyTrooper()))
       return false;
