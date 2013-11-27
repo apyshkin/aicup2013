@@ -1,4 +1,3 @@
-import model.TrooperStance;
 import model.TrooperType;
 import model.World;
 
@@ -11,47 +10,47 @@ import model.World;
  */
 public class PatrolTactics implements ITactics {
   private final Environment environment;
+//  private final Router router;
 
   public PatrolTactics(Environment environment) {
     this.environment = environment;
+//    router = new Router(environment);
   }
+
   @Override
   public void setAction(ITrooperStrategy trooper) {
     trooper.setActionUnderTactics(this);
   }
 
-  @Override
-  public CellPriorities generateCellPriorities(TrooperModel trooper) {
-    World world = environment.getWorld();
-    int[][] priorities = new int[world.getWidth()][world.getHeight()];
-    int maxPriority = 0;
-    for (int i = 0; i < world.getWidth(); ++i)
-      for (int j = 0; j < world.getHeight(); ++j) {
-        int count = 0;
-        for (int k = 0; k < world.getWidth(); ++k)
-          for (int l = 0; l < world.getHeight(); ++l)
-            if (world.isVisible(trooper.getVisionRange(), i, j, TrooperStance.STANDING, k, l, TrooperStance.STANDING)) {
-              priorities[i][j] += CellFunctions.ExploringFunction(environment.getCellNotVisitTime(k, l));
-              ++count;
-            }
-        priorities[i][j] /= count;
-        maxPriority = Math.max(maxPriority, priorities[i][j]);
-      }
-    for (int i = 0; i < world.getWidth(); ++i)
-      for (int j = 0; j < world.getHeight(); ++j) {
-        priorities[i][j] *= 3. / maxPriority;
-        ++priorities[i][j];
-        priorities[i][j] *= Math.sqrt(trooper.getDistanceTo(i, j));
-      }
-
+//  @Override
+//  public CellPriorities generateCellPriorities(TrooperModel trooper) {
+//    World world = environment.getWorld();
+//    boolean[][] reachableCells = environment.getReachableCells(trooper);
+//
+//    int[][] priorities = new int[world.getWidth()][world.getHeight()];
+//    if (router.checkPointWasReached())
+//      router.nextCheckPoint();
+//
+//    MapCell checkPoint = router.getCheckPoint();
+//    int distanceToCheckPoint = environment.getBattleMap().getDistance(trooper.getX(), trooper.getY(),
+//            checkPoint.getX(), checkPoint.getY());
+//
+//    for (int i = 0; i < world.getWidth(); ++i)
+//      for (int j = 0; j < world.getHeight(); ++j)
+//        if (reachableCells[i][j]) {
+//          priorities[i][j] += 4 * (distanceToCheckPoint - environment.getBattleMap().getDistance(i, j,
+//                  checkPoint.getX(), checkPoint.getY()));
+//        }
+//
+//
 //    for (int i = 0; i < world.getHeight(); ++i) {
 //      for (int j = 0; j < world.getWidth(); ++j)
-//        System.out.print(priorities[j][i] + " ");
+//        System.out.format("%3d ", priorities[j][i]);
 //      System.out.println();
 //    }
-
-    return new CellPriorities(environment, priorities);
-  }
+//
+//    return new CellPriorities(environment, priorities);
+//  }
 }
 
 class CellFunctions {
@@ -61,16 +60,16 @@ class CellFunctions {
 
   public static int GlueTogetherFunction(TrooperType myTrooperType, int maxDistance) {
 
-    int points = 0;
-    if (maxDistance > 8)
-      points = 20 - (maxDistance);
-    else if (maxDistance >= 5)
-      points = 30;
-    else if (maxDistance < 2)
-      points = 25;
+    int points;
+    if (maxDistance > 7)
+      points = 15 - maxDistance;
+    else if (maxDistance >= 2)
+      points = 25 - maxDistance;
+    else
+      points = 20 - maxDistance;
 
     if (myTrooperType == TrooperType.COMMANDER)
-      points /= 2;
+      points /= 1.5;
     else if (myTrooperType == TrooperType.FIELD_MEDIC)
       points *= 2;
 

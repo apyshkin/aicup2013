@@ -9,5 +9,5 @@ import model.Trooper;
  */
 interface ITactics {
   void setAction(ITrooperStrategy trooper);
-  CellPriorities generateCellPriorities(TrooperModel trooper);
+//  CellPriorities generateCellPriorities(TrooperModel trooper);
 }

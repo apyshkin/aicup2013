@@ -58,6 +58,6 @@ public class SimpleStrategy implements Strategy {
       if (trooper.isTeammate())
         myTroopers.add(new TrooperModel(trooper));
 
-    currentEnvironment = new Environment(null, world, game, myTroopers.toArray(new TrooperModel[0]), 0);
+    currentEnvironment = new Environment(null, world, game, 0);
   }
 }

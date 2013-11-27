@@ -2,7 +2,7 @@ import model.World;
 
 public class CellPriorities {
   private final Environment environment;
-  private int[][] priorities;
+  private final int[][] priorities;
 
   public CellPriorities(Environment environment, int[][] priorities) {
     this.environment = environment;

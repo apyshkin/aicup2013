@@ -2,7 +2,7 @@ import model.Trooper;
 import model.TrooperStance;
 import model.TrooperType;
 
-public class TrooperModel extends UnitModel {
+public class TrooperModel extends UnitModel implements Cloneable {
   private long playerId;
   private int teammateIndex;
   private boolean teammate;
@@ -203,6 +203,40 @@ public class TrooperModel extends UnitModel {
 
   @Override
   public String toString() {
-    return "trooper " + getType() + " " + getX() + " " + getY() + " ap " + getActionPoints();
+    return "trooper(" + getHitpoints() + "):" + getType() + " at (" + getX() + "," + getY() + ") ap " + getActionPoints();
+  }
+
+  public void useMedkit() {
+    holdingMedkit = false;
+  }
+
+  public void obtainMedkit() {
+    holdingMedkit = true;
+  }
+
+  public void throwGrenade() {
+    holdingGrenade = false;
+  }
+
+  public void obtainGrenade() {
+    holdingGrenade = true;
+  }
+
+  public void useFieldRation() {
+    holdingFieldRation = false;
+  }
+
+  public void obtainFieldRation() {
+    holdingFieldRation = true;
+  }
+
+  @Override
+  public TrooperModel clone() {
+    return new TrooperModel(this);
+  }
+
+  public void turnToEnemy() {
+    teammate = false;
+    playerId++;
   }
 }

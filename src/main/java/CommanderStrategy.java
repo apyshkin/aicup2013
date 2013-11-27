@@ -1,6 +1,7 @@
 import model.Move;
+import model.World;
 
-import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,39 +11,44 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public class CommanderStrategy extends TrooperStrategyAdapter {
+  private final static Logger logger = Logger.getLogger(CommanderStrategy.class.getName());
 
   public CommanderStrategy(Environment environment, TrooperModel trooper, Move move) {
     super(environment, trooper, move);
   }
 
-  private void setAction(ITactics tactics) {
+  public void setAction(CellPriorities priorities) {
     CommanderActionsGenerator actionsGenerator = new CommanderActionsGenerator(environment);
-    final CellPriorities priorities = tactics.generateCellPriorities(trooper);
-    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper,
-            priorities, actionsGenerator);
+    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
 
-    Pair<Action, IActionParameters> pair = algorithmChooser.findBest();
-    Action action = pair.getKey();
-    IActionParameters parameters = pair.getValue();
-    assert(trooper.getActionPoints() < 2 || (action != null && parameters != null));
-    if (action == null)
-      return;
+    Pair<Action, IActionParameters> bestActionWithParams = algorithmChooser.findBest();
+
+    Action action = bestActionWithParams.getKey();
+    IActionParameters parameters = bestActionWithParams.getValue();
+    assert (trooper.getActionPoints() <= 2 || (action != null && parameters != null));
+    if (action == null) {
+      logger.warning("I prefer to end turn now");
+      action = new EndTurnAction(environment);
+    }
 
     try {
       action.act(parameters, trooper, move);
     } catch (InvalidActionException e) {
       e.printStackTrace();
     }
+
   }
 
   @Override
   public void setActionUnderTactics(AttackTactics tactics) {
-    setAction(tactics);
+    PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, 3, 3, -1);
+    setAction(priorityCalculator.getPriorities());
   }
 
   @Override
   public void setActionUnderTactics(PatrolTactics tactics) {
-    setAction(tactics);
+    PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, 5, 3, -1);
+    setAction(priorityCalculator.getPriorities());
   }
 }
 

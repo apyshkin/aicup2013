@@ -35,9 +35,9 @@ public abstract class Action {
       throw new InvalidActionException(actionType);
     else {
       trooper.setActionPoints(trooper.getActionPoints() - cost(trooper));
-      int actionPoints = innerActSimulating(params, trooper);
-      assert(actionPoints >= 0);
-      return actionPoints;
+      int pointsForAction = innerActSimulating(params, trooper);
+//      assert(pointsForAction >= 0);
+      return pointsForAction;
     }
   }
 

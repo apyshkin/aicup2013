@@ -15,8 +15,34 @@ public class TrooperActionsGenerator implements IActionsGenerator {
     actionsList = new ArrayList<>();
     moveActionParameters = new ArrayList<>();
     shootActionParameters = new ArrayList<>();
+    addStanceChangeActions();
+    addMoveActions(trooper);
+    addShootActions();
+    addMedkitActions();
+  }
+
+  private void addMedkitActions() {
+    for (TrooperModel patient : environment.getMyTroopers()) {
+      UseMedkitActionParameters useMedkitActionParams = new UseMedkitActionParameters(patient);
+      actionsList.add(new Pair<Action, IActionParameters>(new UseMedkitAction(environment), useMedkitActionParams));
+    }
+  }
+
+  private void addShootActions() {
+    for (TrooperModel enemy : environment.getAllVisibleTroopers())
+      if (!enemy.isTeammate()) {
+        ShootActionParameters shootActionParams = new ShootActionParameters(enemy);
+        actionsList.add(new Pair<Action, IActionParameters>(new ShootAction(environment), shootActionParams));
+        shootActionParameters.add(shootActionParams);
+      }
+  }
+
+  private void addStanceChangeActions() {
     actionsList.add(new Pair<Action, IActionParameters>(new RaiseStanceAction(environment), new StanceActionParameters()));
     actionsList.add(new Pair<Action, IActionParameters>(new LowerStanceAction(environment), new StanceActionParameters()));
+  }
+
+  private void addMoveActions(TrooperModel trooper) {
     for (Direction direction : Direction.values()) {
       if (direction == Direction.CURRENT_POINT)
         continue;
@@ -25,12 +51,6 @@ public class TrooperActionsGenerator implements IActionsGenerator {
       actionsList.add(new Pair<Action, IActionParameters>(new MoveAction(environment), moveActionParams));
       moveActionParameters.add(moveActionParams);
     }
-    for (TrooperModel enemy : environment.getAllVisibleTroopers())
-      if (!enemy.isTeammate()) {
-        ShootActionParameters shootActionParams = new ShootActionParameters(enemy);
-        actionsList.add(new Pair<Action, IActionParameters>(new ShootAction(environment), shootActionParams));
-        shootActionParameters.add(shootActionParams);
-      }
   }
 
   @Override

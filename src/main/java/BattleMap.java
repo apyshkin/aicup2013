@@ -1,5 +1,4 @@
-import model.CellType;
-import model.World;
+import model.*;
 
 import java.util.*;
 
@@ -12,12 +11,20 @@ import java.util.*;
  */
 public class BattleMap {
   private World world;
+  private CellChecker cellChecker;
+  private PathFinder pathFinder;
+  private ArrayList<Trooper> troopers;
+  private ArrayList<Bonus> bonuses;
   private Cell[][] cells;
   private int[][][][] distances;
+  private byte[][][][][] visibilityFrom; // a player from (i, j) in a standing stance can see a player in (x, y) in a stance z
+  private int[][][] exposure;
 
 
-  public BattleMap(World world) {
+  public BattleMap(World world, CellChecker cellChecker) {
     this.world = world;
+    this.cellChecker = cellChecker;
+    this.pathFinder = new PathFinder(world, cellChecker);
     init();
   }
 
@@ -29,68 +36,85 @@ public class BattleMap {
         cells[i][j] = new Cell(worldCells[i][j], 0);
 
     countDistances();
+    countVisibilities();
+  }
+
+  private void countVisibilities() {
+    int n = world.getWidth();
+    int m = world.getHeight();
+    visibilityFrom = new byte[n][m][n][m][3];
+    exposure = new int[n][m][3];
+    for (int i = 0; i < n; ++i)
+      for (int j = 0; j < m; ++j)
+        if (cellChecker.cellIsFree(i, j))
+          for (int x = 0; x < n; ++x)
+            for (int y = 0; y < m; ++y)
+              if (cellChecker.cellIsFree(x, y)) {
+                visibilityFrom[i][j][x][y][0] = world.isVisible(7, i, j, TrooperStance.STANDING,
+                        x, y, TrooperStance.PRONE) ? (byte) 1 : (byte) 0;
+                visibilityFrom[i][j][x][y][1] = world.isVisible(7, i, j, TrooperStance.STANDING,
+                        x, y, TrooperStance.KNEELING) ? (byte) 1 : (byte) 0;
+                visibilityFrom[i][j][x][y][2] = world.isVisible(7, i, j, TrooperStance.STANDING,
+                        x, y, TrooperStance.STANDING) ? (byte) 1 : (byte) 0;
+                exposure[x][y][0] += visibilityFrom[i][j][x][y][0];
+                exposure[x][y][1] += visibilityFrom[i][j][x][y][1];
+                exposure[x][y][2] += visibilityFrom[i][j][x][y][2];
+              }
+
+
   }
 
   private void countDistances() {
-    distances = new int[world.getWidth()][world.getHeight()][world.getWidth()][world.getHeight()];
-    for (int i = 0; i < world.getWidth() >> 1; ++i)
-      for (int j = 0; j < world.getHeight() >> 1; ++j)
-        if (cellIsFree(i, j)) {
-          findShortestDistances(i, j);
+    final int width = world.getWidth();
+    final int height = world.getHeight();
+    distances = new int[width][height][][];
+    for (int i = 0; i < width >> 1; ++i)
+      for (int j = 0; j < height >> 1; ++j)
+        if (cellChecker.cellIsFree(i, j)) {
+          distances[i][j] = pathFinder.findShortestDistances(i, j);
         }
   }
 
-  // bfs
-  private void findShortestDistances(int x, int y) {
-    boolean was[][] = new boolean[world.getWidth()][world.getHeight()];
-    Queue<Integer> xQueue = new LinkedList<>();
-    Queue<Integer> yQueue = new LinkedList<>();
-    xQueue.add(x);
-    yQueue.add(y);
-    was[x][y] = true;
-    final int[] deltaX = {-1, 0, 1,  0};
-    final int[] deltaY = { 0, 1, 0, -1};
-
-    while (!(xQueue.isEmpty() && yQueue.isEmpty())) {
-      int cellX = xQueue.poll();
-      int cellY = yQueue.poll();
-      for (int i = 0; i < 4; ++i) {
-        int dx = deltaX[i];
-        int dy = deltaY[i];
-        int neighCellX = cellX + dx;
-        int neighCellY = cellY + dy;
-        if (!cellIsWithinBoundaries(neighCellX, neighCellY))
-          continue;
-
-        if (cellIsFree(neighCellX, neighCellY) && !was[neighCellX][neighCellY]) {
-          was[neighCellX][neighCellY] = true;
-          updateDistance(x, y, neighCellX, neighCellY, distances[x][y][cellX][cellY] + 1);
-          xQueue.add(neighCellX);
-          yQueue.add(neighCellY);
-        }
-      }
+  public boolean isVisibleFrom(TrooperModel trooper, int x, int y) {
+    switch (trooper.getStance()) {
+      case PRONE:
+        return visibilityFrom[x][y][trooper.getX()][trooper.getY()][0] == 1;
+      case KNEELING:
+        return visibilityFrom[x][y][trooper.getX()][trooper.getY()][1] == 1;
+      case STANDING:
+        return visibilityFrom[x][y][trooper.getX()][trooper.getY()][2] == 1;
+      default:
+        assert false;
     }
+    return false;
   }
 
-  private void updateDistance(int x, int y, int x1, int y1, int distance) {
-    int width = world.getWidth();
-    int height = world.getHeight();
-    distances[x][height - 1 - y][x1][height - 1 - y1] = distance;
-    distances[width - 1 - x][y][width - 1 - x1][y1] = distance;
-    distances[width - 1 - x][height - 1 - y][width - 1 - x1][height - 1 -y1] = distance;
+  public int getExposure(TrooperModel trooper, int x, int y) {
+    switch (trooper.getStance()) {
+      case PRONE:
+        return exposure[x][y][0];
+      case KNEELING:
+        return exposure[x][y][1];
+      case STANDING:
+        return exposure[x][y][2];
+      default:
+        assert false;
+    }
+    return -1;
   }
 
-  public boolean cellIsFree(int x, int y) {
-    return (world.getCells()[x][y] == CellType.FREE);
-  }
-
-  public boolean cellIsWithinBoundaries(int x, int y) {
-    if (x < 0 || x >= world.getWidth())
-      return false;
-    if (y < 0 || y >= world.getHeight())
-      return false;
-    return true;
-  }
+//  private void updateBacktracks(int x0, int y0, int xCur, int yCur, int x1, int y1) {
+//    int width = world.getWidth();
+//    int height = world.getHeight();
+//    backtracksX[x0][y0][x1][y1] = xCur;
+//    backtracksY[x0][y0][x1][y1] = yCur;
+//    backtracksX[x0][height - 1 - y0][x1][height - 1 - y1] = xCur;
+//    backtracksY[x0][height - 1 - y0][x1][height - 1 - y1] = height - 1 - yCur;
+//    backtracksX[width - 1 - x0][y0][width - 1 - x1][y1] = width - 1 - xCur;
+//    backtracksY[width - 1 - x0][y0][width - 1 - x1][y1] = yCur;
+//    backtracksX[width - 1 - x0][height - 1 - y0][width - 1 - x1][height - 1 - y1] = width - 1 - xCur;
+//    backtracksY[width - 1 - x0][height - 1 - y0][width - 1 - x1][height - 1 - y1] = height - 1 - yCur;
+//  }
 
   public void visitCell(int x, int y, int time) {
     cells[x][y].update(time);
@@ -105,8 +129,41 @@ public class BattleMap {
   }
 
   public int getDistance(int x, int y, int x1, int y1) {
+    int n = world.getWidth();
+    int m = world.getHeight();
+    if (x >= n >> 1) {
+      x = n - 1 - x;
+      x1 = n - 1 - x1;
+    }
+    if (y >= m >> 1) {
+      y = m - 1 - y;
+      y1 = m - 1 - y1;
+    }
+    assert (cellChecker.cellIsFree(x, y) && cellChecker.cellIsFree(x1, y1));
     return distances[x][y][x1][y1];
   }
+
+  public PathFinder getPathFinder() {
+    return pathFinder;
+  }
+
+//  public ArrayList<MapCell> getPath(int x, int y, int x1, int y1) {
+//    ArrayList<MapCell> result = new ArrayList<>();
+//    assert (distances != null);
+//    int curX = x1;
+//    int curY = y1;
+//
+//    while (!(curX == x && curY == y)) {
+//      result.add(new MapCell(world, curX, curY));
+//      int newCurX = backtracksX[x][y][curX][curY];
+//      int newCurY = backtracksY[x][y][curX][curY];
+//      curX = newCurX;
+//      curY = newCurY;
+//    }
+//
+//    Collections.reverse(result);
+//    return result;
+//  }
 }
 
 class Cell {
@@ -119,7 +176,7 @@ class Cell {
   }
 
   public void update(int time) {
-    assert(time > timeOfLastVisit);
+    assert (time > timeOfLastVisit);
     timeOfLastVisit = time;
   }
 }

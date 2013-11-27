@@ -1,5 +1,6 @@
 import model.ActionType;
 import model.Move;
+import model.TrooperType;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,6 +32,8 @@ public class ShootAction extends Action {
     int points = Math.max(oldHitPoints - newHitPoints, 0);
     if (newHitPoints <= 0)
       points += environment.getGame().getTrooperEliminationScore();
+    else if (enemyTrooper.getType() == TrooperType.FIELD_MEDIC)
+      points += 10;
 
     return 2 * points;
   }

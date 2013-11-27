@@ -1,5 +1,6 @@
 import model.Move;
-import model.Trooper;
+
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,21 +10,23 @@ import model.Trooper;
  * To change this template use File | Settings | File Templates.
  */
 class MedicStrategy extends TrooperStrategyAdapter {
+  private final static Logger logger = Logger.getLogger(MedicStrategy.class.getName());
 
   public MedicStrategy(Environment environment, TrooperModel self, Move move) {
     super(environment, self, move);
   }
 
-  private void setAction(ITactics tactics) {
-    HealerActionsGenerator actionsGenerator = new HealerActionsGenerator(environment);
-    final CellPriorities priorities = tactics.generateCellPriorities(trooper);
+  private void setAction(CellPriorities priorities) {
+    MedicActionsGenerator actionsGenerator = new MedicActionsGenerator(environment);
     TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
-    Pair<Action, IActionParameters> pair = algorithmChooser.findBest();
-    Action action = pair.getKey();
-    IActionParameters parameters = pair.getValue();
-    assert(trooper.getActionPoints() < 2 || (action != null && parameters != null));
-    if (action == null)
-      return;
+    Pair<Action, IActionParameters> bestActionWithParams = algorithmChooser.findBest();
+    Action action = bestActionWithParams.getKey();
+    IActionParameters parameters = bestActionWithParams.getValue();
+    assert (trooper.getActionPoints() <= 2 || (action != null && parameters != null));
+    if (action == null) {
+      action = new EndTurnAction(environment);
+      logger.warning("I prefer to end turn now");
+    }
 
     try {
       action.act(parameters, trooper, move);
@@ -31,31 +34,31 @@ class MedicStrategy extends TrooperStrategyAdapter {
       e.printStackTrace();
     }
   }
-
   @Override
   public void setActionUnderTactics(AttackTactics tactics) {
-    setAction(tactics);
+    PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, 3, 4, -2);
+    setAction(priorityCalculator.getPriorities());
   }
 
   @Override
   public void setActionUnderTactics(PatrolTactics tactics) {
-    setAction(tactics);
+    PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, 4, 4, -2);
+    setAction(priorityCalculator.getPriorities());
   }
 }
 
-class HealerActionsGenerator extends TrooperActionsGenerator {
-  public HealerActionsGenerator(Environment environment) {
+class MedicActionsGenerator extends TrooperActionsGenerator {
+  public MedicActionsGenerator(Environment environment) {
     super(environment);
   }
 
   protected void init(TrooperModel healer) {
     super.init(healer);
 
-    for (TrooperModel patient : environment.getAllVisibleTroopers())
-      if (patient.isTeammate()) {
-        HealActionParameters healActionParams = new HealActionParameters(patient);
-        actionsList.add(new Pair<Action, IActionParameters>(new HealAction(environment), healActionParams));
-      }
+    for (TrooperModel patient : environment.getMyTroopers()) {
+      HealActionParameters healActionParams = new HealActionParameters(patient);
+      actionsList.add(new Pair<Action, IActionParameters>(new HealAction(environment), healActionParams));
+    }
   }
 
 }

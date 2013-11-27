@@ -15,7 +15,7 @@ public class HealActionChecker extends ActionChecker {
       return false;
     if (!checkCellIsWithinBoundaries(patient.getX(), patient.getY()))
       return false;
-    if (!checkCellsAreNeighboursOrTheSame(patient.getX(), patient.getY(), healer.getX(), healer.getY()))
+    if (!cellChecker.checkCellsAreNeighboursOrTheSame(patient.getX(), patient.getY(), healer.getX(), healer.getY(), HealActionChecker.this))
       return false;
     if (healer.getPlayerId() != patient.getPlayerId())
       return false;
@@ -27,10 +27,6 @@ public class HealActionChecker extends ActionChecker {
 
   private boolean checkHitPointsAreMax(TrooperModel trooper) {
     return (trooper.getHitpoints() == trooper.getMaximalHitpoints());
-  }
-
-  private boolean checkCellsAreNeighboursOrTheSame(int x, int y, int x1, int y1) {
-    return checkCellsAreNeighbours(x, y, x1, y1) || checkCellsAreTheSame(x, y, x1, y1);
   }
 
   @Override

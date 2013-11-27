@@ -1,6 +1,8 @@
 import model.*;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,21 +12,24 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public final class DefenseStrategy implements Strategy {
-
+  private final static Logger logger = Logger.getLogger(DefenseStrategy.class.getName());
   private static BattleHistory battleHistory = new BattleHistory();
   private static BattleMap battleMap = null;
   private static int currentTime = 0;
+  private static Trooper lastTrooper = null;
 
   @Override
-  public void move(Trooper self, World world, Game game, Move move) {
+  public void move(Trooper trooper, World world, Game game, Move move) {
     ++currentTime;
     initBattleMap(world);
+    logger.log(Level.INFO, "I am " + new TrooperModel(trooper) + " and I want to move!");
     try {
       Environment currentEnvironment = createEnvironment(world, game, currentTime);
-      updateHistory(currentEnvironment);
+      if (nextTrooperMove(trooper))
+        updateHistory(currentEnvironment);
       Analyzer analyzer = new Analyzer(currentEnvironment);
       ITactics chosenTactics = analyzer.chooseTactics(battleHistory);
-      setAction(currentEnvironment.clone(), self, chosenTactics, move); // clone is important
+      setAction(currentEnvironment.clone(), trooper, chosenTactics, move); // clone is important
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -33,11 +38,11 @@ public final class DefenseStrategy implements Strategy {
 
   private void initBattleMap(World world) {
     if (battleMap == null)
-      battleMap = new BattleMap(world);
+      battleMap = new BattleMap(world, new CellChecker(world));
   }
 
   private void setAction(Environment environment, Trooper self, ITactics chosenTactics, Move move) throws InvalidTrooperTypeException {
-    TrooperModel selfCopy = new TrooperModel(self);
+    TrooperModel selfCopy = environment.getMyTrooper(self.getType());
     switch (selfCopy.getType()) {
       case COMMANDER:
         chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
@@ -58,17 +63,20 @@ public final class DefenseStrategy implements Strategy {
   }
 
   private void updateHistory(Environment environment) {
-    battleHistory.add(environment);
+      battleHistory.add(environment);
+  }
+
+  private boolean nextTrooperMove(Trooper self) {
+    if (self == lastTrooper) {
+      return self.getActionPoints() > lastTrooper.getActionPoints();
+    }
+
+    lastTrooper = self;
+    return true;
   }
 
 
   private Environment createEnvironment(World world, Game game, int currentTime) {
-    Trooper[] troopers = world.getTroopers();
-    ArrayList<TrooperModel> myTroopers = new ArrayList<>();
-    for (Trooper trooper : troopers)
-      if (trooper.isTeammate())
-        myTroopers.add(new TrooperModel(trooper));
-
-    return new Environment(battleMap, world, game, myTroopers.toArray(new TrooperModel[0]), currentTime);
+    return new Environment(battleMap, world, game, currentTime);
   }
 }

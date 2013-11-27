@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -7,9 +9,11 @@
  */
 public abstract class ActionChecker {
   protected final Environment environment;
+  final CellChecker cellChecker;
 
   public ActionChecker(Environment environment) {
     this.environment = environment;
+    cellChecker = environment.getCellChecker();
   }
 
   public abstract boolean checkActionValidity(IActionParameters params, TrooperModel trooper);
@@ -17,7 +21,7 @@ public abstract class ActionChecker {
   public abstract int countActionCost(TrooperModel self);
 
   protected boolean checkCellHasNoMen(int x, int y) {
-    TrooperModel[] troopers = environment.getAllVisibleTroopers();
+    ArrayList<TrooperModel> troopers = environment.getAllVisibleTroopers();
     for (TrooperModel trooper : troopers)
       if (trooper.getX() == x && trooper.getY() == y)
         return false;
@@ -25,22 +29,23 @@ public abstract class ActionChecker {
   }
 
   protected boolean checkCellIsFree(int x, int y) {
-    return environment.cellIsFree(x, y);
+    return cellChecker.cellIsFree(x, y);
   }
 
   protected boolean checkCellsAreNeighbours(int x, int y, int x1, int y1) {
-    return environment.cellsAreNeighbours(x, y, x1, y1);
+    return cellChecker.cellsAreNeighbours(x, y, x1, y1);
   }
 
   protected boolean checkCellsAreTheSame(int x, int y, int x1, int y1) {
-    return environment.cellsAreTheSame(x, y, x1, y1);
+    return cellChecker.cellsAreTheSame(x, y, x1, y1);
   }
 
   protected boolean checkCellIsWithinBoundaries(int x, int y) {
-    return environment.cellIsWithinBoundaries(x, y);
+    return cellChecker.cellIsWithinBoundaries(x, y);
   }
 
-  protected boolean checkEnemyIsVisible(TrooperModel self, TrooperModel enemyTrooper) {
-    return environment.enemyIsVisible(self, enemyTrooper);
+  protected boolean checkEnemyIsVisible(TrooperModel trooper, TrooperModel enemyTrooper) {
+    return environment.enemyIsVisible(trooper, enemyTrooper);
   }
+
 }

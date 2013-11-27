@@ -10,6 +10,8 @@ import model.World;
  * To change this template use File | Settings | File Templates.
  */
 public class Utils {
+  public static final int INFINITY = 10000;
+
   public static World copyOfTheWorld(World world) {
     return new World(world.getMoveIndex(), world.getWidth(), world.getHeight(), world.getPlayers(),
             world.getTroopers(), world.getBonuses(), world.getCells(), world.getCellVisibilities());
@@ -44,5 +46,13 @@ public class Utils {
         assert(false);
     }
     return null;
+  }
+
+  public  static void printPriorities(World world, int[][] priorities) {
+    for (int i = 0; i < world.getHeight(); ++i) {
+      for (int j = 0; j < world.getWidth(); ++j)
+        System.out.format("%3d ", priorities[j][i]);
+      System.out.println();
+    }
   }
 }
