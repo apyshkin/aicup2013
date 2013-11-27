@@ -222,7 +222,7 @@ public class TrooperModel extends UnitModel implements Cloneable {
     holdingGrenade = true;
   }
 
-  public void useFieldRation() {
+  public void eatFieldRation() {
     holdingFieldRation = false;
   }
 

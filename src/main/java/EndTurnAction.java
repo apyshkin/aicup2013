@@ -1,6 +1,8 @@
 import model.ActionType;
 import model.Move;
 
+import java.util.logging.Logger;
+
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -15,7 +17,6 @@ public class EndTurnAction extends Action {
 
   @Override
   protected int innerActSimulating(IActionParameters params, TrooperModel trooper) {
-    assert false;
     return 0;
   }
 
@@ -29,19 +30,3 @@ public class EndTurnAction extends Action {
   }
 }
 
-class EndTurnActionChecker extends ActionChecker {
-
-  public EndTurnActionChecker(Environment environment) {
-    super(environment);
-  }
-
-  @Override
-  public boolean checkActionValidity(IActionParameters params, TrooperModel trooper) {
-    return trooper.getActionPoints() <= 2;
-  }
-
-  @Override
-  public int countActionCost(TrooperModel self) {
-    return 0;
-  }
-}

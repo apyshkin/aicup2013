@@ -7,7 +7,7 @@ public final class MyStrategy implements Strategy {
   private final static Logger logger = Logger.getLogger(MyStrategy.class.getName());
   private final Strategy curStrategy = new DefenseStrategy();
 
-  private static final Level LOGGING_LEVEL = Level.OFF;
+  private static final Level LOGGING_LEVEL = Level.INFO;
 
   static {
     new Logging(LOGGING_LEVEL);

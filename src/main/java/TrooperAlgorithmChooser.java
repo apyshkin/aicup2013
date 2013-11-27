@@ -1,3 +1,6 @@
+import model.ActionType;
+import model.TrooperStance;
+
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,14 +32,19 @@ public class TrooperAlgorithmChooser {
     } catch (InvalidActionException e) {
       e.printStackTrace();
     }
+    logger.info("Expected gained points is " + bestAnswer);
     return new Pair<>(bestAction, bestActionParameters);
   }
 
+  private Action currentFirstAction = null;
+  private IActionParameters currentFirstActionParams = null;
+
   private int simulateMove(TrooperModel trooper, int points, boolean firstRun) throws InvalidActionException {
     assert (trooper.getActionPoints() >= 0);
-    wasAction = false;
-
-    int maxPoints = -Utils.INFINITY;
+//    wasAction = false;
+//    int maxPoints = -Utils.INFINITY;
+    final int curPositionPoints = points + countPotential(trooper);
+    int maxPoints = curPositionPoints;
     if (trooper.getActionPoints() > 0) {
       TrooperModel trooperCopy = new TrooperModel(trooper);
       ArrayList<Pair<Action, IActionParameters>> listOfActions =
@@ -50,25 +58,33 @@ public class TrooperAlgorithmChooser {
       }
     }
 
-    if (!wasAction) {
-      maxPoints = updateAnswer(trooper, points);
-    }
-    else if (trooper.getActionPoints() <= 2) {
-      maxPoints = Math.max(points + countPotential(trooper), maxPoints);
-      if (maxPoints > bestAnswer)
-        bestAnswer = maxPoints;
+    if (maxPoints > bestAnswer) {
+      bestAnswer = maxPoints;
+      bestAction = currentFirstAction;
+      bestActionParameters = currentFirstActionParams;
+      if (firstRun && maxPoints == curPositionPoints) {
+        logger.info("ending turn is good");
+        bestAction = new EndTurnAction(environment);
+        bestActionParameters = new EndTurnActionParameters();
+      }
     }
 
-    wasAction = true;
+//    maxPoints = updateAnswer(trooper, points);
+
+//    if (!wasAction) {
+//    maxPoints = updateAnswer(trooper, points);
+//    }
+
+//    wasAction = true;
     return maxPoints;
   }
 
   private int updateAnswer(TrooperModel trooper, int points) {
     int maxPoints = points + countPotential(trooper);
     if (maxPoints > bestAnswer) {
-//      logger.log(Level.FINE, "updating answer " + bestAnswer + ", points: " + points + ", potential here: " + (maxPoints - points));
       bestAnswer = maxPoints;
     }
+//      logger.log(Level.FINE, "updating answer " + bestAnswer + ", points: " + points + ", potential here: " + (maxPoints - points));
 //    logger.log(Level.FINE, "updating maxpoints " + maxPoints + ", points: " + points + ", potential here: " + (maxPoints - points));
     return maxPoints;
   }
@@ -82,12 +98,16 @@ public class TrooperAlgorithmChooser {
   // returns possible total points we can gain going down this branch
   private int actIfCan(Action action, IActionParameters actionParameters, int points, boolean firstRun) throws InvalidActionException {
     if (action.canAct(actionParameters, trooper)) {
+      if (firstRun) {
+        currentFirstAction = action;
+        currentFirstActionParams = actionParameters;
+      }
       int pointsForAction = action.actSimulating(actionParameters, trooper);
       int pointsAtThisBranch = simulateMove(trooper, points + pointsForAction, false);
       assert (bestAnswer >= pointsAtThisBranch);
 
-      if (firstRun && bestAnswer == pointsAtThisBranch)
-        updateBest(action, actionParameters);
+//      if (firstRun && bestAnswer == pointsAtThisBranch)
+//        updateBest(action, actionParameters);
       action.undoActSimulating(actionParameters, trooper);
       actionsGenerator.updateActionParametersWithTrooper(trooper);
       return pointsAtThisBranch;
@@ -96,18 +116,11 @@ public class TrooperAlgorithmChooser {
   }
 
   private int countPotential(TrooperModel trooper) {
-//    int teamPlayerScore = countTeamPlayerScore(trooper);
-
-    return cellPriorities.getPriorityAtCell(trooper.getX(), trooper.getY());
+    int points = 0;
+    if (trooper.getStance() == TrooperStance.PRONE)
+      points = -5;
+    else if (trooper.getStance() == TrooperStance.KNEELING)
+      points = -2;
+    return points + cellPriorities.getPriorityAtCell(trooper.getX(), trooper.getY());
   }
-
-//  private int countTeamPlayerScore(TrooperModel trooper) {
-//    BattleMap battleMap = environment.getBattleMap();
-//    ArrayList<TrooperModel> myTroopers = environment.getMyTroopers();
-//    int maxDistance = 0;
-//    for (TrooperModel trooper1 : myTroopers)
-//      maxDistance = Math.max(maxDistance, battleMap.getDistance(trooper, trooper1));
-//    return CellFunctions.GlueTogetherFunction(trooper.getType(), maxDistance);
-//  }
-
 }

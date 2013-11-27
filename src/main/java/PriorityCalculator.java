@@ -1,5 +1,7 @@
 import model.World;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -9,68 +11,59 @@ import model.World;
  */
 public class PriorityCalculator {
   private final Environment environment;
-  private final int kPatrol;
-  private final int kTeamDensity;
-  private final int kDistToHealer;
   private TrooperModel trooper;
-  private PatrollingPriority patrollingPriority;
-  private TeamDensityPriority teamDensityPriority;
-  private DistToHealerPriority distToHealerPriority;
+  private List<PriorityWeight> priorityWeightList;
 
-  public PriorityCalculator(Environment environment, TrooperModel trooper, int kPatrol, int kTeamDensity, int kDistToHealer) {
+  public PriorityCalculator(Environment environment, TrooperModel trooper, List<PriorityWeight> priorityWeightList) {
     this.environment = environment;
     this.trooper = trooper;
-    this.kPatrol = kPatrol;
-    this.kTeamDensity = kTeamDensity;
-    this.kDistToHealer = kDistToHealer;
-    init();
-  }
-
-  private void init() {
-    patrollingPriority = new PatrollingPriority(environment, trooper);
-    teamDensityPriority = new TeamDensityPriority(environment, trooper);
-    distToHealerPriority = new DistToHealerPriority(environment, trooper);
+    this.priorityWeightList = priorityWeightList;
   }
 
   public CellPriorities getPriorities() {
     World world = environment.getWorld();
-    boolean[][] reachableCells = environment.getReachableCells(trooper);
-
-    int[][] priorities = new int[world.getWidth()][world.getHeight()];
+    int[][] priorityWeights = new int[world.getWidth()][world.getHeight()];
+    boolean[][] suitableCells = getSuitableCells(trooper);
 
     for (int i = 0; i < world.getWidth(); ++i)
       for (int j = 0; j < world.getHeight(); ++j)
-        if (reachableCells[i][j] && cellHasNoOtherMen(trooper, i, j)) {
-          if (environment.getCellChecker().cellIsFree(i, j)) {
-            priorities[i][j] += countPatrollingWeight(i, j);
-            priorities[i][j] += countTeamDensityWeight(i, j);
-            priorities[i][j] += countDistToHealerWeight(i, j);
+        if (suitableCells[i][j]) {
+          int cellWeight = 0;
+          for (PriorityWeight weightCounter : priorityWeightList) {
+            cellWeight += weightCounter.countCellWeight(i, j);
           }
+          priorityWeights[i][j] = cellWeight;
         }
 
-    return new CellPriorities(environment, priorities);
+    printAll(suitableCells);
+    System.out.println("SUM");
+    Utils.printPriorities(world, priorityWeights);
+    return new CellPriorities(environment, priorityWeights);
   }
 
-  private boolean cellHasNoOtherMen(TrooperModel trooper, int x, int y) {
+  private void printAll(boolean[][] suitableCells) {
+    int[][] weights = new int[environment.getWorld().getWidth()][environment.getWorld().getHeight()];
+    for (PriorityWeight weightCounter : priorityWeightList) {
+    for (int i = 0; i < environment.getWorld().getWidth(); ++i)
+      for (int j = 0; j < environment.getWorld().getHeight(); ++j)
+        if (suitableCells[i][j]) {
+          weights[i][j] = weightCounter.countCellWeight(i, j);
+        }
+      System.out.println("PRIORITIES " + weightCounter);
+      Utils.printPriorities(environment.getWorld(), weights);
+    }
+  }
+
+  private boolean[][] getSuitableCells(TrooperModel trooper) {
+    boolean[][] reachableCells = environment.getReachableCells(trooper);
+    System.out.println("REACHABLE");
+    Utils.printPriorities(environment.getWorld(), reachableCells);
     for (TrooperModel anotherTrooper : environment.getMyTroopers())
-      if (trooper != anotherTrooper) {
-        if (anotherTrooper.getX() == x && anotherTrooper.getY() == y)
-          return false;
-      }
+      if (trooper != anotherTrooper)
+        reachableCells[anotherTrooper.getX()][anotherTrooper.getY()] = false;
+    System.out.println("REACHABLE TROOPERS CONSIDERED");
+    Utils.printPriorities(environment.getWorld(), reachableCells);
 
-    return true;
-  }
-
-
-  private int countPatrollingWeight(int x, int y) {
-    return kPatrol * patrollingPriority.getPriority(x, y);
-  }
-
-  private int countTeamDensityWeight(int x, int y) {
-    return kTeamDensity * teamDensityPriority.getPriority(x, y);
-  }
-
-  private int countDistToHealerWeight(int x, int y) {
-    return kDistToHealer * distToHealerPriority.getPriority(x, y);
+    return reachableCells;
   }
 }

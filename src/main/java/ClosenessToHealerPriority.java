@@ -9,13 +9,13 @@ import java.util.ArrayList;
  * Time: 4:23 AM
  * To change this template use File | Settings | File Templates.
  */
-public class DistToHealerPriority implements IPriority {
+public class ClosenessToHealerPriority implements IPriority {
   private static final int MAX_RADIUS = 6;
   private static ArrayList<MapCell> trooperLocations;
   private final Environment environment;
   private final TrooperModel trooper;
 
-  public DistToHealerPriority(Environment environment, TrooperModel trooper) {
+  public ClosenessToHealerPriority(Environment environment, TrooperModel trooper) {
     this.environment = environment;
     this.trooper = trooper;
     initLocations(environment, trooper);
@@ -31,19 +31,19 @@ public class DistToHealerPriority implements IPriority {
 
   @Override
   public int getPriority(int x, int y) {
-    if (!environment.isAlive(TrooperType.FIELD_MEDIC))
+    if (!environment.getMyTeam().isAlive(TrooperType.FIELD_MEDIC))
       return 0;
 
     int sum = 0;
 
     int[][] distances;
     if (trooper.getType() != TrooperType.FIELD_MEDIC) {
-      TrooperModel healer = environment.getMyTrooper(TrooperType.FIELD_MEDIC);
+      TrooperModel healer = environment.getMyTeam().getMyTrooper(TrooperType.FIELD_MEDIC);
       trooperLocations.add(new MapCell(environment.getWorld(), x, y));
       distances = environment.getBattleMap().getPathFinder().findShortestDistances(healer.getX(), healer.getY(), trooperLocations, MAX_RADIUS);
       for (MapCell location : trooperLocations)
         if (distances[location.getX()][location.getY()] == 0)
-          sum += 3 * MAX_RADIUS;
+          sum += 5 * MAX_RADIUS;
         else
           sum += distances[location.getX()][location.getY()];
 
@@ -53,12 +53,12 @@ public class DistToHealerPriority implements IPriority {
 
       for (MapCell location : trooperLocations)
         if (distances[location.getX()][location.getY()] == 0)
-          sum += 3 * MAX_RADIUS;
+          sum += 5 * MAX_RADIUS;
         else
           sum += distances[location.getX()][location.getY()];
 
     }
 
-    return sum;
+    return sum / environment.getMyTroopers().size();
   }
 }

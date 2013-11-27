@@ -1,5 +1,6 @@
 import model.Move;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -11,54 +12,22 @@ import java.util.logging.Logger;
  */
 class MedicStrategy extends TrooperStrategyAdapter {
   private final static Logger logger = Logger.getLogger(MedicStrategy.class.getName());
+  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(0, 1, -1, -3);
+  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(3, 2, -1, -3);
 
   public MedicStrategy(Environment environment, TrooperModel self, Move move) {
     super(environment, self, move);
   }
 
-  private void setAction(CellPriorities priorities) {
-    MedicActionsGenerator actionsGenerator = new MedicActionsGenerator(environment);
-    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
-    Pair<Action, IActionParameters> bestActionWithParams = algorithmChooser.findBest();
-    Action action = bestActionWithParams.getKey();
-    IActionParameters parameters = bestActionWithParams.getValue();
-    assert (trooper.getActionPoints() <= 2 || (action != null && parameters != null));
-    if (action == null) {
-      action = new EndTurnAction(environment);
-      logger.warning("I prefer to end turn now");
-    }
-
-    try {
-      action.act(parameters, trooper, move);
-    } catch (InvalidActionException e) {
-      e.printStackTrace();
-    }
-  }
   @Override
-  public void setActionUnderTactics(AttackTactics tactics) {
-    PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, 3, 4, -2);
-    setAction(priorityCalculator.getPriorities());
+  protected CoefficientPack getAttackCoefficients() {
+    return ATTACK_COEFFICIENTS;
   }
 
   @Override
-  public void setActionUnderTactics(PatrolTactics tactics) {
-    PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, 4, 4, -2);
-    setAction(priorityCalculator.getPriorities());
-  }
-}
-
-class MedicActionsGenerator extends TrooperActionsGenerator {
-  public MedicActionsGenerator(Environment environment) {
-    super(environment);
-  }
-
-  protected void init(TrooperModel healer) {
-    super.init(healer);
-
-    for (TrooperModel patient : environment.getMyTroopers()) {
-      HealActionParameters healActionParams = new HealActionParameters(patient);
-      actionsList.add(new Pair<Action, IActionParameters>(new HealAction(environment), healActionParams));
-    }
+  protected CoefficientPack getPatrolCoefficients() {
+    return PATROL_COEFFICIENTS;
   }
 
 }
+

@@ -1,20 +1,7 @@
 import java.util.ArrayList;
 
-/**
- * Created with IntelliJ IDEA.
- * User: alexeyka
- * Date: 11/25/13
- * Time: 11:07 AM
- * To change this template use File | Settings | File Templates.
- */
-interface IRouter {
-  public MapCell getCheckPoint();
-  public void nextCheckPoint();
-  public boolean checkPointWasReached();
-}
-
 public class Router implements IRouter {
-  private static final int MAX_DIST_CHECKPOINT = 10;
+  private static final int MAX_DIST_CHECKPOINT = 6;
 
   private static MapCell center;
   private static MapCell myCorner;
@@ -24,7 +11,7 @@ public class Router implements IRouter {
   private static boolean initialized = false;
 
   private static MapCell[] initCorners() {
-    return new MapCell[] {myCorner, myCorner.reflectX(),
+    return new MapCell[] {myCorner, myCorner.reflectX(), center,
             myCorner.reflectXY(), myCorner.reflectY(), center};
   }
 

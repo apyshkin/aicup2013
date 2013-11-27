@@ -1,6 +1,6 @@
 import model.Move;
-import model.World;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -13,42 +13,21 @@ import java.util.logging.Logger;
 public class CommanderStrategy extends TrooperStrategyAdapter {
   private final static Logger logger = Logger.getLogger(CommanderStrategy.class.getName());
 
+  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(3, 1, -2, 0);
+  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(4, 1, -2, 0);
+
   public CommanderStrategy(Environment environment, TrooperModel trooper, Move move) {
     super(environment, trooper, move);
   }
 
-  public void setAction(CellPriorities priorities) {
-    CommanderActionsGenerator actionsGenerator = new CommanderActionsGenerator(environment);
-    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
-
-    Pair<Action, IActionParameters> bestActionWithParams = algorithmChooser.findBest();
-
-    Action action = bestActionWithParams.getKey();
-    IActionParameters parameters = bestActionWithParams.getValue();
-    assert (trooper.getActionPoints() <= 2 || (action != null && parameters != null));
-    if (action == null) {
-      logger.warning("I prefer to end turn now");
-      action = new EndTurnAction(environment);
-    }
-
-    try {
-      action.act(parameters, trooper, move);
-    } catch (InvalidActionException e) {
-      e.printStackTrace();
-    }
-
+  @Override
+  protected CoefficientPack getAttackCoefficients() {
+    return ATTACK_COEFFICIENTS;
   }
 
   @Override
-  public void setActionUnderTactics(AttackTactics tactics) {
-    PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, 3, 3, -1);
-    setAction(priorityCalculator.getPriorities());
-  }
-
-  @Override
-  public void setActionUnderTactics(PatrolTactics tactics) {
-    PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, 5, 3, -1);
-    setAction(priorityCalculator.getPriorities());
+  protected CoefficientPack getPatrolCoefficients() {
+    return PATROL_COEFFICIENTS;
   }
 }
 

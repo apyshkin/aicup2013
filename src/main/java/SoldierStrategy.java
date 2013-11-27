@@ -1,5 +1,6 @@
 import model.Move;
-import model.Trooper;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,17 +10,20 @@ import model.Trooper;
  * To change this template use File | Settings | File Templates.
  */
 class SoldierStrategy extends TrooperStrategyAdapter {
-
+  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(2, 1, -2, -2);
+  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(2, 1, -2, -2);
 
   protected SoldierStrategy(Environment environment, TrooperModel self, Move move) {
     super(environment, self, move);
   }
 
   @Override
-  public void setActionUnderTactics(AttackTactics attackTactics) {
+  protected CoefficientPack getAttackCoefficients() {
+    return ATTACK_COEFFICIENTS;
   }
 
   @Override
-  public void setActionUnderTactics(PatrolTactics patrolTactics) {
+  protected CoefficientPack getPatrolCoefficients() {
+    return PATROL_COEFFICIENTS;
   }
 }

@@ -44,8 +44,8 @@ public class BattleMap {
     int m = world.getHeight();
     visibilityFrom = new byte[n][m][n][m][3];
     exposure = new int[n][m][3];
-    for (int i = 0; i < n; ++i)
-      for (int j = 0; j < m; ++j)
+    for (int i = 0; i < n >> 1; ++i)
+      for (int j = 0; j < m >> 1; ++j)
         if (cellChecker.cellIsFree(i, j))
           for (int x = 0; x < n; ++x)
             for (int y = 0; y < m; ++y)
@@ -76,13 +76,25 @@ public class BattleMap {
   }
 
   public boolean isVisibleFrom(TrooperModel trooper, int x, int y) {
+    int n = world.getWidth();
+    int m = world.getHeight();
+    int x1 = trooper.getX();
+    int y1 = trooper.getY();
+    if (x >= n >> 1) {
+      x = n - 1 - x;
+      x1 = n - 1 - x1;
+    }
+    if (y >= m >> 1) {
+      y = m - 1 - y;
+      y1 = m - 1 - y1;
+    }
     switch (trooper.getStance()) {
       case PRONE:
-        return visibilityFrom[x][y][trooper.getX()][trooper.getY()][0] == 1;
+        return visibilityFrom[x][y][x1][y1][0] == 1;
       case KNEELING:
-        return visibilityFrom[x][y][trooper.getX()][trooper.getY()][1] == 1;
+        return visibilityFrom[x][y][x1][y1][1] == 1;
       case STANDING:
-        return visibilityFrom[x][y][trooper.getX()][trooper.getY()][2] == 1;
+        return visibilityFrom[x][y][x1][y1][2] == 1;
       default:
         assert false;
     }

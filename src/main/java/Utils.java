@@ -48,10 +48,18 @@ public class Utils {
     return null;
   }
 
-  public  static void printPriorities(World world, int[][] priorities) {
+  public static void printPriorities(World world, int[][] priorities) {
     for (int i = 0; i < world.getHeight(); ++i) {
       for (int j = 0; j < world.getWidth(); ++j)
         System.out.format("%3d ", priorities[j][i]);
+      System.out.println();
+    }
+  }
+
+  public static void printPriorities(World world, boolean[][] priorities) {
+    for (int i = 0; i < world.getHeight(); ++i) {
+      for (int j = 0; j < world.getWidth(); ++j)
+        System.out.format("%1d ", priorities[j][i] ? 1 : 0);
       System.out.println();
     }
   }

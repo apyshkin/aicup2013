@@ -1,7 +1,5 @@
 import model.*;
 
-import java.util.ArrayList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -22,7 +20,7 @@ public final class DefenseStrategy implements Strategy {
   public void move(Trooper trooper, World world, Game game, Move move) {
     ++currentTime;
     initBattleMap(world);
-    logger.log(Level.INFO, "I am " + new TrooperModel(trooper) + " and I want to move!");
+    logger.info("I am " + new TrooperModel(trooper) + " and I want to move!");
     try {
       Environment currentEnvironment = createEnvironment(world, game, currentTime);
       if (nextTrooperMove(trooper))
@@ -42,20 +40,20 @@ public final class DefenseStrategy implements Strategy {
   }
 
   private void setAction(Environment environment, Trooper self, ITactics chosenTactics, Move move) throws InvalidTrooperTypeException {
-    TrooperModel selfCopy = environment.getMyTrooper(self.getType());
+    TrooperModel selfCopy = environment.getMyTeam().getMyTrooper(self.getType());
     switch (selfCopy.getType()) {
       case COMMANDER:
         chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
         break;
       case SOLDIER:
-        chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
+        chosenTactics.setAction(new SoldierStrategy(environment, selfCopy, move));
         break;
 //        chosenTactics.setAction(new SoldierStrategy(environment, selfCopy, move));
       case FIELD_MEDIC:
         chosenTactics.setAction(new MedicStrategy(environment, selfCopy, move));
         break;
       case SNIPER:
-        chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
+        chosenTactics.setAction(new SoldierStrategy(environment, selfCopy, move));
         break;
       default:
         throw new InvalidTrooperTypeException(selfCopy.getType().toString());

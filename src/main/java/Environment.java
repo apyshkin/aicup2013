@@ -13,17 +13,18 @@ public final class Environment implements Cloneable {
 
   private final World world;
   private final Game game;
+  private final Team myTeam;
   private final CellChecker cellChecker;
   private final int currentTime;
-  private BattleMap battleMap;
-  private ArrayList<TrooperModel> myTroopers;
-  private ArrayList<TrooperModel> visibleTroopers;
 
+  private BattleMap battleMap;
+  private ArrayList<TrooperModel> visibleTroopers;
 
   public Environment(BattleMap battleMap, World world, Game game, int currentTime) {
     this.battleMap = battleMap;
     this.world = world;
     this.game = game;
+    this.myTeam = new Team(findMyTroopers());
     cellChecker = new CellChecker(world);
     this.currentTime = currentTime;
   }
@@ -32,16 +33,19 @@ public final class Environment implements Cloneable {
     return battleMap;
   }
 
-  public ArrayList<TrooperModel> getMyTroopers() {
-    if (myTroopers != null)
-      return myTroopers;
-
-    myTroopers = new ArrayList<>();
+  private ArrayList<TrooperModel> findMyTroopers() {
+    assert (myTeam == null);
+    ArrayList<TrooperModel> myTroopers = new ArrayList<>();
     for (TrooperModel trooper : getAllVisibleTroopers())
       if (trooper.isTeammate())
         myTroopers.add(new TrooperModel(trooper));
 
     return myTroopers;
+  }
+
+  public ArrayList<TrooperModel> getMyTroopers() {
+    assert myTeam != null;
+    return myTeam.getMyTroopers();
   }
 
   public World getWorld() {
@@ -80,13 +84,6 @@ public final class Environment implements Cloneable {
     return currentTime - cell.timeOfLastVisit;
   }
 
-  public long getMyId() {
-    ArrayList<TrooperModel> myTroopers = getMyTroopers();
-    assert (!myTroopers.isEmpty());
-
-    return myTroopers.get(0).getPlayerId();
-  }
-
   public boolean enemyIsVisible(TrooperModel self, TrooperModel enemyTrooper) {
     return world.isVisible(self.getShootingRange(), self.getX(), self.getY(), self.getStance(),
             enemyTrooper.getX(), enemyTrooper.getY(), enemyTrooper.getStance());
@@ -112,7 +109,7 @@ public final class Environment implements Cloneable {
   }
 
   public void putEnemy(TrooperModel enemy) {
-    assert (!enemy.isTeammate() && enemy.getPlayerId() != myTroopers.get(0).getPlayerId());
+    assert (!enemy.isTeammate() && enemy.getPlayerId() != myTeam.getMyId());
     visibleTroopers.add(enemy);
   }
 
@@ -127,21 +124,8 @@ public final class Environment implements Cloneable {
     return answer;
   }
 
-  public boolean isAlive(TrooperType trooperType) {
-    for (TrooperModel trooper : myTroopers)
-      if (trooper.getType() == trooperType)
-        return true;
-
-    return false;
-  }
-
-  public TrooperModel getMyTrooper(TrooperType trooperType) {
-    getMyTroopers();
-    for (TrooperModel trooper : myTroopers)
-      if (trooper.getType() == trooperType)
-        return trooper;
-
-    assert false;
-    return null;
+  public Team getMyTeam() {
+    return myTeam;
   }
 }
+

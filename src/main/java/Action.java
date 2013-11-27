@@ -36,7 +36,6 @@ public abstract class Action {
     else {
       trooper.setActionPoints(trooper.getActionPoints() - cost(trooper));
       int pointsForAction = innerActSimulating(params, trooper);
-//      assert(pointsForAction >= 0);
       return pointsForAction;
     }
   }
