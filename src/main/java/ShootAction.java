@@ -33,9 +33,9 @@ public class ShootAction extends Action {
     if (newHitPoints <= 0)
       points += environment.getGame().getTrooperEliminationScore();
     else if (enemyTrooper.getType() == TrooperType.FIELD_MEDIC)
-      points += 10;
+      points += 1;
 
-    return 2 * points;
+    return points;
   }
 
   @Override

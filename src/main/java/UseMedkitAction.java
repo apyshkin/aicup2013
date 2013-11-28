@@ -25,7 +25,7 @@ public class UseMedkitAction extends Action {
     trooper.useMedkit();
     int points = Math.min(newHitPoints, patient.getMaximalHitpoints()) - oldHitPoints;
 
-    return points;
+    return 2 * points;
   }
 
   private int getAdditionalHitPoints(TrooperModel trooper, TrooperModel patient) {

@@ -60,4 +60,8 @@ public class Team {
   public TrooperModel getLeader() {
     return leader;
   }
+
+  public int count() {
+    return myTroopers.size();
+  }
 }

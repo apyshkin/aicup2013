@@ -34,7 +34,7 @@ public abstract class TrooperStrategyAdapter implements ITrooperStrategy {
   }
 
   public void setAction(CellPriorities priorities) {
-    CommanderActionsGenerator actionsGenerator = new CommanderActionsGenerator(environment);
+    IActionsGenerator actionsGenerator = createActionsGenerator();
     TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
 
     Pair<Action, IActionParameters> bestActionWithParams = algorithmChooser.findBest();
@@ -58,6 +58,7 @@ public abstract class TrooperStrategyAdapter implements ITrooperStrategy {
     return priorityCalculator.getPriorities();
   }
 
+  protected abstract IActionsGenerator createActionsGenerator();
   protected abstract CoefficientPack getAttackCoefficients();
   protected abstract CoefficientPack getPatrolCoefficients();
 }

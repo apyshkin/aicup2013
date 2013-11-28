@@ -27,6 +27,14 @@ public class MapCell {
     return x;
   }
 
+  boolean isAt(int x, int y) {
+    return this.x == x && this.y == y;
+  }
+
+  boolean containsATrooper(TrooperModel trooper) {
+    return isAt(trooper.getX(), trooper.getY());
+  }
+
   public MapCell reflectX() {
     return new MapCell(world, x, getHeight() - 1 - y);
   }

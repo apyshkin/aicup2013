@@ -77,7 +77,8 @@ public class Analyzer {
       }
     }
 
-    assert (suffered != null);
+    if (suffered == null)
+      return;
 
     MapCell closestCell = calcEnemyLocation(suffered);
 

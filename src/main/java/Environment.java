@@ -81,7 +81,7 @@ public final class Environment implements Cloneable {
 
   public int getCellNotVisitTime(int x, int y) {
     Cell cell = battleMap.getCell(x, y);
-    return currentTime - cell.timeOfLastVisit;
+    return currentTime - cell.getTimeOfLastVisit();
   }
 
   public boolean enemyIsVisible(TrooperModel self, TrooperModel enemyTrooper) {

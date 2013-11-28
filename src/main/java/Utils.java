@@ -1,5 +1,6 @@
 import model.Direction;
 import model.Game;
+import model.TrooperStance;
 import model.World;
 
 /**
@@ -38,12 +39,16 @@ public class Utils {
 
   public static Direction getOppositeDirection(Direction direction) {
     switch (direction) {
-      case NORTH : return Direction.SOUTH;
-      case SOUTH : return Direction.NORTH;
-      case WEST : return Direction.EAST;
-      case EAST : return Direction.WEST;
-      default :
-        assert(false);
+      case NORTH:
+        return Direction.SOUTH;
+      case SOUTH:
+        return Direction.NORTH;
+      case WEST:
+        return Direction.EAST;
+      case EAST:
+        return Direction.WEST;
+      default:
+        assert (false);
     }
     return null;
   }
@@ -62,5 +67,26 @@ public class Utils {
         System.out.format("%1d ", priorities[j][i] ? 1 : 0);
       System.out.println();
     }
+  }
+
+  public static void printPriorities(World world, int[][][] priorities, int stance) {
+    for (int i = 0; i < world.getHeight(); ++i) {
+      for (int j = 0; j < world.getWidth(); ++j)
+        System.out.format("%3d ", priorities[j][i][stance]);
+      System.out.println();
+    }
+  }
+
+  public static void printPriorities(World world, boolean[][][] priorities, int stance) {
+    for (int i = 0; i < world.getHeight(); ++i) {
+      for (int j = 0; j < world.getWidth(); ++j)
+        System.out.format("%3d ", priorities[j][i][stance] ? 1 : 0);
+      System.out.println();
+    }
+  }
+
+  private final static TrooperStance[] STANCES = new TrooperStance[]{ TrooperStance.PRONE, TrooperStance.KNEELING, TrooperStance.STANDING };
+  public static TrooperStance getStance(int stance) {
+    return STANCES[stance];
   }
 }

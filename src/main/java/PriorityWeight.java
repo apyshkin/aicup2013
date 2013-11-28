@@ -14,11 +14,11 @@ public class PriorityWeight {
     this.priorityCoefficient = priorityCoefficient;
   }
 
-  public int countCellWeight(int x, int y) {
+  public int countCellWeight(int x, int y, int stance) {
     if (priorityCoefficient == 0)
       return 0;
 
-    return priorityCoefficient * priority.getPriority(x, y);
+    return priorityCoefficient * priority.getPriority(x, y, stance);
   }
 
   @Override

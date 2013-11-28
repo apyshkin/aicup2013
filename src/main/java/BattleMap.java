@@ -13,7 +13,7 @@ public class BattleMap {
   private World world;
   private CellChecker cellChecker;
   private PathFinder pathFinder;
-  private ArrayList<Trooper> troopers;
+  private ArrayList<TrooperModel> visibleTroopers;
   private ArrayList<Bonus> bonuses;
   private Cell[][] cells;
   private int[][][][] distances;
@@ -67,15 +67,15 @@ public class BattleMap {
   private void countDistances() {
     final int width = world.getWidth();
     final int height = world.getHeight();
-    distances = new int[width][height][][];
+    distances = new int[width][height][width][height];
     for (int i = 0; i < width >> 1; ++i)
       for (int j = 0; j < height >> 1; ++j)
         if (cellChecker.cellIsFree(i, j)) {
-          distances[i][j] = pathFinder.findShortestDistances(i, j);
+          pathFinder.findDistances(i, j, distances[i][j]);
         }
   }
 
-  public boolean isVisibleFrom(TrooperModel trooper, int x, int y) {
+  public boolean isVisibleFrom(int x, int y, TrooperModel trooper) {
     int n = world.getWidth();
     int m = world.getHeight();
     int x1 = trooper.getX();
@@ -88,45 +88,16 @@ public class BattleMap {
       y = m - 1 - y;
       y1 = m - 1 - y1;
     }
-    switch (trooper.getStance()) {
-      case PRONE:
-        return visibilityFrom[x][y][x1][y1][0] == 1;
-      case KNEELING:
-        return visibilityFrom[x][y][x1][y1][1] == 1;
-      case STANDING:
-        return visibilityFrom[x][y][x1][y1][2] == 1;
-      default:
-        assert false;
-    }
-    return false;
+    return visibilityFrom[x][y][x1][y1][trooper.getStance().ordinal()] == 1;
   }
 
   public int getExposure(TrooperModel trooper, int x, int y) {
-    switch (trooper.getStance()) {
-      case PRONE:
-        return exposure[x][y][0];
-      case KNEELING:
-        return exposure[x][y][1];
-      case STANDING:
-        return exposure[x][y][2];
-      default:
-        assert false;
-    }
-    return -1;
+    if (x >= world.getWidth() >> 1)
+      x = world.getWidth() - 1 - x;
+    if (y >= world.getHeight() >> 1)
+      y = world.getHeight() - 1 - y;
+    return exposure[x][y][trooper.getStance().ordinal()];
   }
-
-//  private void updateBacktracks(int x0, int y0, int xCur, int yCur, int x1, int y1) {
-//    int width = world.getWidth();
-//    int height = world.getHeight();
-//    backtracksX[x0][y0][x1][y1] = xCur;
-//    backtracksY[x0][y0][x1][y1] = yCur;
-//    backtracksX[x0][height - 1 - y0][x1][height - 1 - y1] = xCur;
-//    backtracksY[x0][height - 1 - y0][x1][height - 1 - y1] = height - 1 - yCur;
-//    backtracksX[width - 1 - x0][y0][width - 1 - x1][y1] = width - 1 - xCur;
-//    backtracksY[width - 1 - x0][y0][width - 1 - x1][y1] = yCur;
-//    backtracksX[width - 1 - x0][height - 1 - y0][width - 1 - x1][height - 1 - y1] = width - 1 - xCur;
-//    backtracksY[width - 1 - x0][height - 1 - y0][width - 1 - x1][height - 1 - y1] = height - 1 - yCur;
-//  }
 
   public void visitCell(int x, int y, int time) {
     cells[x][y].update(time);
@@ -159,32 +130,41 @@ public class BattleMap {
     return pathFinder;
   }
 
-//  public ArrayList<MapCell> getPath(int x, int y, int x1, int y1) {
-//    ArrayList<MapCell> result = new ArrayList<>();
-//    assert (distances != null);
-//    int curX = x1;
-//    int curY = y1;
-//
-//    while (!(curX == x && curY == y)) {
-//      result.add(new MapCell(world, curX, curY));
-//      int newCurX = backtracksX[x][y][curX][curY];
-//      int newCurY = backtracksY[x][y][curX][curY];
-//      curX = newCurX;
-//      curY = newCurY;
-//    }
-//
-//    Collections.reverse(result);
-//    return result;
-//  }
+  public void update(World world) {
+
+  }
+
 }
 
 class Cell {
-  CellType cellType;
-  int timeOfLastVisit;
+  private CellType cellType;
+  private TrooperModel trooper = null;
+  private Bonus bonus = null;
+  private int timeOfLastVisit;
 
   public Cell(CellType cellType, int timeOfLastVisit) {
     this.cellType = cellType;
     this.timeOfLastVisit = timeOfLastVisit;
+  }
+
+  int getTimeOfLastVisit() {
+    return timeOfLastVisit;
+  }
+
+  public TrooperModel getTrooper() {
+    return trooper;
+  }
+
+  void setTrooper(TrooperModel trooper) {
+    this.trooper = trooper;
+  }
+
+  public Bonus getBonus() {
+    return bonus;
+  }
+
+  void setBonus(Bonus bonus) {
+    this.bonus = bonus;
   }
 
   public void update(int time) {

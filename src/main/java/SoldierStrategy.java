@@ -1,7 +1,5 @@
 import model.Move;
 
-import java.util.List;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -10,11 +8,16 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 class SoldierStrategy extends TrooperStrategyAdapter {
-  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(2, 1, -2, -2);
-  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(2, 1, -2, -2);
+  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(2, 1, -4, -2, 0);
+  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(2, 1, -6, -3, 0);
 
   protected SoldierStrategy(Environment environment, TrooperModel self, Move move) {
     super(environment, self, move);
+  }
+
+  @Override
+  protected IActionsGenerator createActionsGenerator() {
+    return new TrooperActionsGenerator(environment);
   }
 
   @Override

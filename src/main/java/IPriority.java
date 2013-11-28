@@ -6,5 +6,5 @@
  * To change this template use File | Settings | File Templates.
  */
 public interface IPriority {
-  public int getPriority(int x, int y);
+  public int getPriority(int x, int y, int stance);
 }

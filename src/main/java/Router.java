@@ -39,7 +39,7 @@ public class Router implements IRouter {
   @Override
   public void nextCheckPoint() {
     ++checkPointCount;
-    checkPointCount &= 3;
+    checkPointCount = checkPointCount % corners.length;
     updateCurrentCheckPoint();
   }
 

@@ -17,7 +17,7 @@ public class TeamDensityPriority implements IPriority {
   }
 
   @Override
-  public int getPriority(int x, int y) {
+  public int getPriority(int x, int y, int stance) {
     int maxDistance = countMaxDistance(x, y);
 
     int points;

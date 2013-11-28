@@ -191,6 +191,12 @@ public class TrooperModel extends UnitModel implements Cloneable {
     }
   }
 
+  public void move(int x, int y, TrooperStance stance) {
+    setX(x);
+    setY(y);
+    setStance(stance);
+  }
+
   @Override
   public boolean equals(Object object) {
     assert (object instanceof TrooperModel);

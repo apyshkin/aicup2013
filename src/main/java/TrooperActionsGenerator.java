@@ -15,8 +15,8 @@ public class TrooperActionsGenerator implements IActionsGenerator {
     actionsList = new ArrayList<>();
     moveActionParameters = new ArrayList<>();
     shootActionParameters = new ArrayList<>();
-    addStanceChangeActions();
     addMoveActions(trooper);
+    addStanceChangeActions();
     addShootActions();
     addMedkitActions();
   }

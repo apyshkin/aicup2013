@@ -1,7 +1,5 @@
 import model.TrooperType;
 
-import java.util.ArrayList;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -11,54 +9,64 @@ import java.util.ArrayList;
  */
 public class ClosenessToHealerPriority implements IPriority {
   private static final int MAX_RADIUS = 6;
-  private static ArrayList<MapCell> trooperLocations;
+  private final PathFinder pathFinder;
   private final Environment environment;
   private final TrooperModel trooper;
+  private int[][] distances;
+  private boolean[][] trooperLocations;
 
   public ClosenessToHealerPriority(Environment environment, TrooperModel trooper) {
     this.environment = environment;
     this.trooper = trooper;
+    pathFinder = environment.getBattleMap().getPathFinder();
     initLocations(environment, trooper);
-
   }
 
   private void initLocations(Environment environment, TrooperModel trooper) {
-    trooperLocations = new ArrayList<>();
+    trooperLocations = new boolean[environment.getWorld().getWidth()][environment.getWorld().getHeight()];
     for (TrooperModel myTrooper : environment.getMyTroopers())
       if (myTrooper != trooper && myTrooper.getType() != TrooperType.FIELD_MEDIC)
-        trooperLocations.add(new MapCell(environment.getWorld(), myTrooper.getX(), myTrooper.getY()));
+        trooperLocations[myTrooper.getX()][myTrooper.getY()] = true;
   }
 
   @Override
-  public int getPriority(int x, int y) {
+  public int getPriority(int x, int y, int stance) {
     if (!environment.getMyTeam().isAlive(TrooperType.FIELD_MEDIC))
       return 0;
 
     int sum = 0;
+    int[][] distances = initDistances();
+    TrooperModel healer = environment.getMyTeam().getMyTrooper(TrooperType.FIELD_MEDIC);
 
-    int[][] distances;
-    if (trooper.getType() != TrooperType.FIELD_MEDIC) {
-      TrooperModel healer = environment.getMyTeam().getMyTrooper(TrooperType.FIELD_MEDIC);
-      trooperLocations.add(new MapCell(environment.getWorld(), x, y));
-      distances = environment.getBattleMap().getPathFinder().findShortestDistances(healer.getX(), healer.getY(), trooperLocations, MAX_RADIUS);
-      for (MapCell location : trooperLocations)
-        if (distances[location.getX()][location.getY()] == 0)
-          sum += 5 * MAX_RADIUS;
-        else
-          sum += distances[location.getX()][location.getY()];
+    {
+      if (trooper != healer)
+        trooperLocations[x][y] = true;
 
-      trooperLocations.remove(trooperLocations.size() - 1);
-    } else {
-      distances = environment.getBattleMap().getPathFinder().findShortestDistances(x, y, trooperLocations, MAX_RADIUS);
+      pathFinder.findDistancesWithObstacles(healer.getX(), healer.getY(), distances, trooperLocations, MAX_RADIUS);
+      for (TrooperModel myTrooper : environment.getMyTroopers())
+        if (myTrooper != healer)
+          if (distances[myTrooper.getX()][myTrooper.getY()] == 0)
+            sum += 3 * MAX_RADIUS;
+          else
+            sum += distances[myTrooper.getX()][myTrooper.getY()];
 
-      for (MapCell location : trooperLocations)
-        if (distances[location.getX()][location.getY()] == 0)
-          sum += 5 * MAX_RADIUS;
-        else
-          sum += distances[location.getX()][location.getY()];
-
+      if (trooper != healer)
+        trooperLocations[x][y] = false;
     }
 
     return sum / environment.getMyTroopers().size();
   }
+
+  private int[][] initDistances() {
+    if (distances == null)
+      distances = new int[environment.getWorld().getWidth()][environment.getWorld().getHeight()];
+    else
+      for (int i = 0; i < environment.getWorld().getWidth(); ++i)
+        for (int j = 0; j < environment.getWorld().getHeight(); ++j)
+          distances[i][j] = 0;
+
+    return distances;
+  }
 }
+
+

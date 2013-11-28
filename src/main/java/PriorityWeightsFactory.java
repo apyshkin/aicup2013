@@ -22,6 +22,7 @@ public class PriorityWeightsFactory {
     result.add(new PriorityWeight(new TeamDensityPriority(environment, trooper), coefficientPack.getkTeamDensity()));
     result.add(new PriorityWeight(new ClosenessToHealerPriority(environment, trooper), coefficientPack.getkClosenessToHealer()));
     result.add(new PriorityWeight(new ClosenessToLeaderPriority(environment, trooper), coefficientPack.getkClosenessToLeader()));
+    result.add(new PriorityWeight(new AttackPriority(environment, trooper), coefficientPack.getkAttack()));
     return result;
   }
 }

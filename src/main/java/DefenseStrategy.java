@@ -37,6 +37,8 @@ public final class DefenseStrategy implements Strategy {
   private void initBattleMap(World world) {
     if (battleMap == null)
       battleMap = new BattleMap(world, new CellChecker(world));
+    else
+      battleMap.update(world);
   }
 
   private void setAction(Environment environment, Trooper self, ITactics chosenTactics, Move move) throws InvalidTrooperTypeException {

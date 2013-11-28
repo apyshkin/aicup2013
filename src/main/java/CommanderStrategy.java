@@ -1,6 +1,5 @@
 import model.Move;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -13,11 +12,16 @@ import java.util.logging.Logger;
 public class CommanderStrategy extends TrooperStrategyAdapter {
   private final static Logger logger = Logger.getLogger(CommanderStrategy.class.getName());
 
-  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(3, 1, -2, 0);
-  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(4, 1, -2, 0);
+  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(4, 2, -2, 0, 1);
+  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(6, 2, -4, 0, 0);
 
   public CommanderStrategy(Environment environment, TrooperModel trooper, Move move) {
     super(environment, trooper, move);
+  }
+
+  @Override
+  protected IActionsGenerator createActionsGenerator() {
+    return new CommanderActionsGenerator(environment);
   }
 
   @Override
