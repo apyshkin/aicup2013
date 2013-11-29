@@ -58,7 +58,7 @@ public class Analyzer {
 
   private void determineEnemy(BattleHistory battleHistory) {
     assert (battleHistory.size() > 1);
-    assert (environment.getVisibleEnemies().isEmpty());
+    assert (environment.getEnemies().isEmpty());
 
     Environment last = battleHistory.getLast();
     Environment oneBeforeLast = battleHistory.get(battleHistory.size() - 2);
@@ -66,15 +66,15 @@ public class Analyzer {
     TrooperModel suffered = null;
     for (TrooperModel oldTrooper : oneBeforeLast.getMyTroopers()) {
       boolean found = false;
-      for (TrooperModel trooper : last.getMyTroopers()) {
+      for (TrooperModel trooper : last.getMyTroopers())
         if (trooper.getType() == oldTrooper.getType()) {
           found = true;
           if (trooper.getHitpoints() < oldTrooper.getHitpoints())
             suffered = oldTrooper;
         }
-        if (!found)
-          suffered = oldTrooper;
-      }
+
+      if (!found)
+        suffered = oldTrooper;
     }
 
     if (suffered == null)
@@ -113,7 +113,7 @@ public class Analyzer {
   }
 
   private boolean canSeeTheEnemy() {
-    return !environment.getVisibleEnemies().isEmpty();
+    return !environment.getEnemies().isEmpty();
   }
 
   private boolean wasAttackedSinceLastMove(BattleHistory battleHistory) {

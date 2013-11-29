@@ -1,5 +1,4 @@
-import model.ActionType;
-import model.TrooperStance;
+import model.*;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -77,7 +76,8 @@ public class TrooperAlgorithmChooser {
         currentFirstActionParams = actionParameters;
       }
       int pointsForAction = action.actSimulating(actionParameters, trooper);
-      int pointsAtThisBranch = simulateMove(trooper, points + pointsForAction, false);
+      int positionPoints = countPositionPoints(trooper);
+      int pointsAtThisBranch = simulateMove(trooper, points + pointsForAction + positionPoints, false);
       assert (bestAnswer >= pointsAtThisBranch);
       action.undoActSimulating(actionParameters, trooper);
       actionsGenerator.updateActionParametersWithTrooper(trooper);
@@ -86,12 +86,25 @@ public class TrooperAlgorithmChooser {
     return -Utils.INFINITY;
   }
 
+  private int countPositionPoints(TrooperModel trooper) {
+    int tx = trooper.getX();
+    int ty = trooper.getY();
+    int points = 0;
+
+    if (environment.getBattleMap().hasBonus(tx, ty)) {
+      Bonus bonus = environment.getBattleMap().getCell(tx, ty).getBonus();
+      if (bonus.getType() == BonusType.FIELD_RATION && !trooper.isHoldingFieldRation())
+        points = 20;
+      else if (bonus.getType() == BonusType.MEDIKIT && !trooper.isHoldingMedkit())
+        points = 25 * (trooper.getMaximalHitpoints() / (trooper.getHitpoints() + 10));
+      else if (bonus.getType() == BonusType.GRENADE && !trooper.isHoldingGrenade())
+        points = 20;
+    }
+    return points;
+  }
+
   private int countPotential(TrooperModel trooper) {
     int points = 0;
-    if (trooper.getStance() == TrooperStance.PRONE)
-      points = -2;
-    else if (trooper.getStance() == TrooperStance.KNEELING)
-      points = -1;
     return points +
             cellPriorities.getPriorityAtCell(trooper.getX(), trooper.getY(),
                     trooper.getStance().ordinal());

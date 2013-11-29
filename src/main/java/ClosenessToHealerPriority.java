@@ -8,7 +8,7 @@ import model.TrooperType;
  * To change this template use File | Settings | File Templates.
  */
 public class ClosenessToHealerPriority implements IPriority {
-  private static final int MAX_RADIUS = 6;
+  private static final int MAX_RADIUS = 10;
   private final PathFinder pathFinder;
   private final Environment environment;
   private final TrooperModel trooper;
@@ -42,11 +42,11 @@ public class ClosenessToHealerPriority implements IPriority {
       if (trooper != healer)
         trooperLocations[x][y] = true;
 
-      pathFinder.findDistancesWithObstacles(healer.getX(), healer.getY(), distances, trooperLocations, MAX_RADIUS);
+      pathFinder.findDistancesWithObstacles(healer.getX(), healer.getY(), MAX_RADIUS, trooperLocations, distances);
       for (TrooperModel myTrooper : environment.getMyTroopers())
         if (myTrooper != healer)
           if (distances[myTrooper.getX()][myTrooper.getY()] == 0)
-            sum += 3 * MAX_RADIUS;
+            sum += 2 * MAX_RADIUS;
           else
             sum += distances[myTrooper.getX()][myTrooper.getY()];
 

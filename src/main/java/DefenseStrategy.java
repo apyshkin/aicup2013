@@ -37,29 +37,33 @@ public final class DefenseStrategy implements Strategy {
   private void initBattleMap(World world) {
     if (battleMap == null)
       battleMap = new BattleMap(world, new CellChecker(world));
-    else
-      battleMap.update(world);
+
+    battleMap.update(world);
   }
 
   private void setAction(Environment environment, Trooper self, ITactics chosenTactics, Move move) throws InvalidTrooperTypeException {
-    TrooperModel selfCopy = environment.getMyTeam().getMyTrooper(self.getType());
-    switch (selfCopy.getType()) {
-      case COMMANDER:
-        chosenTactics.setAction(new CommanderStrategy(environment, selfCopy, move));
-        break;
-      case SOLDIER:
-        chosenTactics.setAction(new SoldierStrategy(environment, selfCopy, move));
-        break;
-//        chosenTactics.setAction(new SoldierStrategy(environment, selfCopy, move));
-      case FIELD_MEDIC:
-        chosenTactics.setAction(new MedicStrategy(environment, selfCopy, move));
-        break;
-      case SNIPER:
-        chosenTactics.setAction(new SoldierStrategy(environment, selfCopy, move));
-        break;
-      default:
-        throw new InvalidTrooperTypeException(selfCopy.getType().toString());
-    }
+    TrooperModel myTrooper = environment.getMyTeam().getMyTrooper(self.getType());
+
+    if (environment.getMyTeam().getLeader() == myTrooper)
+      chosenTactics.setAction(new CommanderStrategy(environment, myTrooper, move));
+    else
+      switch (myTrooper.getType()) {
+        case COMMANDER:
+          chosenTactics.setAction(new CommanderStrategy(environment, myTrooper, move));
+          break;
+        case SOLDIER:
+          chosenTactics.setAction(new SoldierStrategy(environment, myTrooper, move));
+          break;
+//        chosenTactics.setAction(new SoldierStrategy(environment, myTrooper, move));
+        case FIELD_MEDIC:
+          chosenTactics.setAction(new MedicStrategy(environment, myTrooper, move));
+          break;
+        case SNIPER:
+          chosenTactics.setAction(new SoldierStrategy(environment, myTrooper, move));
+          break;
+        default:
+          throw new InvalidTrooperTypeException(myTrooper.getType().toString());
+      }
   }
 
   private void updateHistory(Environment environment) {
@@ -77,6 +81,6 @@ public final class DefenseStrategy implements Strategy {
 
 
   private Environment createEnvironment(World world, Game game, int currentTime) {
-    return new Environment(battleMap, world, game, currentTime);
+    return new Environment(battleMap, world, game, battleMap.getPathFinder(), currentTime);
   }
 }

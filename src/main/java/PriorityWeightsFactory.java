@@ -23,6 +23,8 @@ public class PriorityWeightsFactory {
     result.add(new PriorityWeight(new ClosenessToHealerPriority(environment, trooper), coefficientPack.getkClosenessToHealer()));
     result.add(new PriorityWeight(new ClosenessToLeaderPriority(environment, trooper), coefficientPack.getkClosenessToLeader()));
     result.add(new PriorityWeight(new AttackPriority(environment, trooper), coefficientPack.getkAttack()));
+    result.add(new PriorityWeight(new DefensePriority(environment, trooper), coefficientPack.getkDefense()));
+    result.add(new PriorityWeight(new ExposurePriority(environment, trooper), coefficientPack.getkExposure()));
     return result;
   }
 }

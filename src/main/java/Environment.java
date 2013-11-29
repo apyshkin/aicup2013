@@ -16,16 +16,16 @@ public final class Environment implements Cloneable {
   private final Team myTeam;
   private final CellChecker cellChecker;
   private final int currentTime;
-
+  private final PathFinder pathFinder;
   private BattleMap battleMap;
-  private ArrayList<TrooperModel> visibleTroopers;
 
-  public Environment(BattleMap battleMap, World world, Game game, int currentTime) {
+  public Environment(BattleMap battleMap, World world, Game game, PathFinder pathFinder, int currentTime) {
     this.battleMap = battleMap;
     this.world = world;
     this.game = game;
     this.myTeam = new Team(findMyTroopers());
-    cellChecker = new CellChecker(world);
+    this.cellChecker = new CellChecker(world);
+    this.pathFinder = pathFinder;
     this.currentTime = currentTime;
   }
 
@@ -36,9 +36,9 @@ public final class Environment implements Cloneable {
   private ArrayList<TrooperModel> findMyTroopers() {
     assert (myTeam == null);
     ArrayList<TrooperModel> myTroopers = new ArrayList<>();
-    for (TrooperModel trooper : getAllVisibleTroopers())
+    for (TrooperModel trooper : getVisibleTroopers())
       if (trooper.isTeammate())
-        myTroopers.add(new TrooperModel(trooper));
+        myTroopers.add(trooper);
 
     return myTroopers;
   }
@@ -56,27 +56,12 @@ public final class Environment implements Cloneable {
     return game;
   }
 
-  public ArrayList<TrooperModel> getAllVisibleTroopers() {
-    if (visibleTroopers != null)
-      return visibleTroopers;
-
-    Trooper[] troopers = world.getTroopers();
-    visibleTroopers = new ArrayList<>();
-    for (Trooper trooper : troopers)
-      visibleTroopers.add(new TrooperModel(trooper));
-    return visibleTroopers;
+  public ArrayList<TrooperModel> getVisibleTroopers() {
+    return battleMap.getVisibleTroopers();
   }
 
-  public ArrayList<TrooperModel> getVisibleEnemies() {
-    if (visibleTroopers == null)
-      getAllVisibleTroopers();
-
-    ArrayList<TrooperModel> enemies = new ArrayList<>();
-    for (TrooperModel trooper : visibleTroopers)
-      if (!trooper.isTeammate())
-        enemies.add(trooper);
-
-    return enemies;
+  public ArrayList<TrooperModel> getEnemies() {
+    return battleMap.getEnemies();
   }
 
   public int getCellNotVisitTime(int x, int y) {
@@ -91,7 +76,7 @@ public final class Environment implements Cloneable {
 
   public Environment clone() {
     World worldClone = Utils.copyOfTheWorld(world);
-    return new Environment(battleMap, worldClone, game, currentTime);
+    return new Environment(battleMap, worldClone, game, pathFinder, currentTime);
   }
 
   public void visitCell(int x, int y) {
@@ -109,8 +94,7 @@ public final class Environment implements Cloneable {
   }
 
   public void putEnemy(TrooperModel enemy) {
-    assert (!enemy.isTeammate() && enemy.getPlayerId() != myTeam.getMyId());
-    visibleTroopers.add(enemy);
+    battleMap.putEnemy(enemy);
   }
 
   boolean[][] getReachableCells(TrooperModel trooper) {

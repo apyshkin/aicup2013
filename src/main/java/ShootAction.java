@@ -32,10 +32,10 @@ public class ShootAction extends Action {
     int points = Math.max(oldHitPoints - newHitPoints, 0);
     if (newHitPoints <= 0)
       points += environment.getGame().getTrooperEliminationScore();
-    else if (enemyTrooper.getType() == TrooperType.FIELD_MEDIC)
-      points += 1;
+    if (enemyTrooper.getType() == TrooperType.FIELD_MEDIC)
+      points += 2;
 
-    return points;
+    return 2 * points;
   }
 
   @Override

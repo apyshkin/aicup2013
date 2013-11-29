@@ -1,4 +1,5 @@
 import model.CellType;
+import model.Unit;
 import model.World;
 
 /**
@@ -35,7 +36,11 @@ public class CellChecker {
     return Math.abs(x - x1) + Math.abs(y - y1) == 1;
   }
 
-  protected boolean checkCellsAreNeighboursOrTheSame(int x, int y, int x1, int y1, ActionChecker actionChecker) {
-    return actionChecker.checkCellsAreNeighbours(x, y, x1, y1) || actionChecker.checkCellsAreTheSame(x, y, x1, y1);
+  protected boolean cellsAreNeighboursOrTheSame(int x, int y, int x1, int y1) {
+    return cellsAreNeighbours(x, y, x1, y1) || cellsAreTheSame(x, y, x1, y1);
+  }
+
+  public boolean cellIsWithinRange(int x1, int y1, int x2, int y2, double range) {
+    return UnitModel.getDistance(x1, y1, x2, y2) <= range;
   }
 }

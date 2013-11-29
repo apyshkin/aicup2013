@@ -2,8 +2,8 @@ import model.World;
 
 public class MapCell {
   private World world;
-  int x;
-  int y;
+  private final int x;
+  private final int y;
 
   private int getWidth() {
     return world.getWidth();

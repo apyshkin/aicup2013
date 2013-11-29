@@ -21,7 +21,7 @@ public abstract class ActionChecker {
   public abstract int countActionCost(TrooperModel self);
 
   protected boolean checkCellHasNoMen(int x, int y) {
-    ArrayList<TrooperModel> troopers = environment.getAllVisibleTroopers();
+    ArrayList<TrooperModel> troopers = environment.getVisibleTroopers();
     for (TrooperModel trooper : troopers)
       if (trooper.getX() == x && trooper.getY() == y)
         return false;
@@ -48,4 +48,7 @@ public abstract class ActionChecker {
     return environment.enemyIsVisible(trooper, enemyTrooper);
   }
 
+  protected boolean checkHasBonus(TrooperModel trooper) {
+    return trooper.isHoldingFieldRation() || trooper.isHoldingMedkit() || trooper.isHoldingGrenade();
+  }
 }

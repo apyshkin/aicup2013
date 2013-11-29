@@ -1,7 +1,7 @@
 import model.TrooperStance;
 import model.World;
 
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,12 +12,12 @@ import java.util.ArrayList;
  */
 public class AttackPriority implements IPriority {
 
-  private static final int MAX_RADIUS = 14;
+  private static final int MAX_RADIUS = 4;
   private final Environment environment;
   private final TrooperModel trooper;
+  private final boolean[][] cellsOneCanShootFrom;
   private int[][] distances;
   private boolean[][] trooperLocations;
-  private final boolean[][] cellsOneCanShootFrom;
 
   public AttackPriority(Environment environment, TrooperModel trooper) {
     this.environment = environment;
@@ -29,7 +29,7 @@ public class AttackPriority implements IPriority {
   private boolean[][] getCellsFromWhichEnemyCanBeShotAt() {
     World world = environment.getWorld();
     boolean[][] result = new boolean[world.getWidth()][world.getHeight()];
-    ArrayList<TrooperModel> enemies = environment.getVisibleEnemies();
+    ArrayList<TrooperModel> enemies = environment.getEnemies();
     for (int i = 0; i < world.getWidth(); ++i)
       for (int j = 0; j < world.getHeight(); ++j)
         for (TrooperModel enemy : enemies)
@@ -41,45 +41,67 @@ public class AttackPriority implements IPriority {
 
   private void initLocations(Environment environment, TrooperModel trooper) {
     trooperLocations = new boolean[environment.getWorld().getWidth()][environment.getWorld().getHeight()];
-//    for (TrooperModel myTrooper : environment.getMyTroopers())
-//      if (myTrooper != trooper)
-//        trooperLocations[myTrooper.getX()][myTrooper.getY()] = true;
+    for (TrooperModel enemy : environment.getEnemies()) {
+      trooperLocations[enemy.getX()][enemy.getY()] = true;
+    }
   }
 
   @Override
   public int getPriority(int x, int y, int stance) {
     final TrooperStance trooperStance = Utils.getStance(stance);
 
+    trooperLocations[x][y] = true;
     int points = 0;
-    ArrayList<TrooperModel> enemies = environment.getVisibleEnemies();
+    ArrayList<TrooperModel> enemies = environment.getEnemies();
     for (TrooperModel enemy : enemies) {
       if (enemyIsVisibleFrom(x, y, trooperStance, enemy)) {
-        points += countAverageShootPoints(trooper, trooperStance);
+        points += 2 * countAverageShootPoints(trooper, trooperStance);
         points += countReinforcement(x, y);
+        break;
       }
     }
-    return points / environment.getMyTeam().count();
+    trooperLocations[x][y] = false;
+
+    return points; /// environment.getMyTeam().count();
   }
 
   private int countReinforcement(int x, int y) {
-    int points = 0;
-    trooperLocations[x][y] = true;
-
-    for (TrooperModel trooperForReinforcement : environment.getMyTroopers()) {
-      if (trooperForReinforcement != trooper)
-        if (canAttackTeammate(trooperForReinforcement))
-          points += countAverageShootPoints(trooperForReinforcement, TrooperStance.STANDING);
-    }
-
-    trooperLocations[x][y] = false;
-
-    return points;
-  }
-
-  private boolean canAttackTeammate(TrooperModel teammate) {
     final PathFinder pathFinder = environment.getBattleMap().getPathFinder();
-    int distance = pathFinder.countDistanceToMarkedCellsWithObstacles(teammate.getX(), teammate.getY(), trooperLocations, cellsOneCanShootFrom, MAX_RADIUS);
-    return (distance <= MAX_RADIUS);
+    int points = 0;
+
+    ArrayList<Pair<TrooperModel, Integer>> troopers = new ArrayList<>();
+    int maxCount = 0;
+    for (TrooperModel trooperForReinforcement : environment.getMyTroopers()) {
+      if (trooperForReinforcement != trooper) {
+        int count = 0;
+        int distances[][] = pathFinder.findDistancesWithObstacles(trooperForReinforcement.getX(),
+                                                                  trooperForReinforcement.getY(),
+                                                                  MAX_RADIUS, trooperLocations);
+        int min = Utils.INFINITY;
+        for (int i = 0; i < cellsOneCanShootFrom.length; ++i)
+          for (int j = 0; j < cellsOneCanShootFrom[0].length; ++j)
+            if (cellsOneCanShootFrom[i][j] && distances[i][j] <= MAX_RADIUS) {
+              ++count;
+              min = Math.min(min, distances[i][j]);
+            }
+        maxCount = Math.max(maxCount, count);
+        troopers.add(new Pair<>(trooperForReinforcement, min));
+      }
+    }
+    maxCount--;
+    Collections.sort(troopers, new Comparator<Pair<TrooperModel, Integer>>() {
+      @Override
+      public int compare(Pair<TrooperModel, Integer> o1, Pair<TrooperModel, Integer> o2) {
+        return (o1.getValue() - o2.getValue());
+      }
+    });
+    for (Pair<TrooperModel, Integer> teammate : troopers) {
+      if (maxCount == 0)
+        break;
+      points += countAverageShootPoints(teammate.getKey(), TrooperStance.STANDING);
+      --maxCount;
+    }
+    return points;
   }
 
   private int countAverageShootPoints(TrooperModel trooper, TrooperStance stance) {

@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 class Pair<K, V> {
-  K k;
-  V v;
+  private final K k;
+  private final V v;
 
   public Pair(K k, V v) {
     this.k = k;

@@ -15,6 +15,7 @@ public class Team {
 
   public Team(ArrayList <TrooperModel> myTroopers) {
     this.myTroopers = myTroopers;
+
     leader = findLeader();
   }
 

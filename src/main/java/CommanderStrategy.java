@@ -12,8 +12,8 @@ import java.util.logging.Logger;
 public class CommanderStrategy extends TrooperStrategyAdapter {
   private final static Logger logger = Logger.getLogger(CommanderStrategy.class.getName());
 
-  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(4, 2, -2, 0, 1);
-  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(6, 2, -4, 0, 0);
+  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(8, 3, -4, 0, 1, 1, 0);
+  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(14, 4, -2, 0, 0, 0, -1);
 
   public CommanderStrategy(Environment environment, TrooperModel trooper, Move move) {
     super(environment, trooper, move);

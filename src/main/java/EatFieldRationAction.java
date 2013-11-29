@@ -10,7 +10,7 @@ import model.Move;
  */
 public class EatFieldRationAction extends Action {
   public EatFieldRationAction(Environment environment) {
-    super(ActionType.EAT_FIELD_RATION, new UseMedkitActionChecker(environment), environment);
+    super(ActionType.EAT_FIELD_RATION, new EatFieldRationActionChecker(environment), environment);
   }
 
   @Override
@@ -22,7 +22,7 @@ public class EatFieldRationAction extends Action {
     trooper.eatFieldRation();
     int points = Math.min(newAP, trooper.getInitialActionPoints()) - oldAP;
 
-    return points;
+    return points << 1;
   }
 
   private int getAdditionalAP() {

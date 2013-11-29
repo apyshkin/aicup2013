@@ -27,6 +27,10 @@ public abstract class UnitModel {
     return hypot(x - this.x, y - this.y);
   }
 
+  public static double getDistance(int x1, int y1, int x2, int y2) {
+    return hypot(x2 - x1, y2 - y1);
+  }
+
   public double getDistanceTo(UnitModel unit) {
     return getDistanceTo(unit.x, unit.y);
   }

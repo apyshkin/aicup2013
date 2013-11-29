@@ -1,4 +1,6 @@
 import model.Direction;
+import model.World;
+
 import java.util.ArrayList;
 
 public class TrooperActionsGenerator implements IActionsGenerator {
@@ -19,6 +21,13 @@ public class TrooperActionsGenerator implements IActionsGenerator {
     addStanceChangeActions();
     addShootActions();
     addMedkitActions();
+    addFieldRationActions(trooper);
+    addThrowGrenadeActions();
+  }
+
+  private void addFieldRationActions(TrooperModel me) {
+    EatFieldRationActionParameters actionParameters = new EatFieldRationActionParameters(me);
+    actionsList.add(new Pair<Action, IActionParameters>(new EatFieldRationAction(environment), actionParameters));
   }
 
   private void addMedkitActions() {
@@ -29,11 +38,24 @@ public class TrooperActionsGenerator implements IActionsGenerator {
   }
 
   private void addShootActions() {
-    for (TrooperModel enemy : environment.getAllVisibleTroopers())
+    for (TrooperModel enemy : environment.getVisibleTroopers())
       if (!enemy.isTeammate()) {
         ShootActionParameters shootActionParams = new ShootActionParameters(enemy);
         actionsList.add(new Pair<Action, IActionParameters>(new ShootAction(environment), shootActionParams));
         shootActionParameters.add(shootActionParams);
+      }
+  }
+
+  private void addThrowGrenadeActions() {
+    World world = environment.getWorld();
+    ThrowGrenadeActionChecker checker = new ThrowGrenadeActionChecker(environment);
+
+    for (int i = 0; i < world.getWidth(); ++i)
+      for (int j = 0; j < world.getHeight(); ++j) {
+        ThrowGrenadeActionParameters actionParameters = new ThrowGrenadeActionParameters(i, j);
+        if (checker.checkActionValidity(actionParameters)) {
+          actionsList.add(new Pair<Action, IActionParameters>(new ThrowGrenadeAction(environment), actionParameters));
+        }
       }
   }
 
