@@ -96,7 +96,7 @@ public class TrooperAlgorithmChooser {
       if (bonus.getType() == BonusType.FIELD_RATION && !trooper.isHoldingFieldRation())
         points = 20;
       else if (bonus.getType() == BonusType.MEDIKIT && !trooper.isHoldingMedkit())
-        points = 25 * (trooper.getMaximalHitpoints() / (trooper.getHitpoints() + 10));
+        points = 45 * (trooper.getMaximalHitpoints() / (trooper.getHitpoints() + 10));
       else if (bonus.getType() == BonusType.GRENADE && !trooper.isHoldingGrenade())
         points = 20;
     }

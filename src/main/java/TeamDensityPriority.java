@@ -23,8 +23,8 @@ public class TeamDensityPriority implements IPriority {
     int points;
     if (maxDistance >= 7)
       points = 15 - maxDistance;
-    else if (maxDistance >= 3)
-      points = 20 - maxDistance;
+    else if (maxDistance >= 4)
+      points = 25 - maxDistance;
     else
       points = 14 + maxDistance;
     return points;

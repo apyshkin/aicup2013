@@ -26,8 +26,8 @@ public class CoefficientPack {
     this.kClosenessToHealer = kClosenessToHealer;
     this.kClosenessToLeader = kClosenessToLeader;
     this.kAttack = kAttack;
-    this.kExposure = kExposure;
     this.kDefense = kDefense;
+    this.kExposure = kExposure;
   }
 
   public int getkPatrol() {

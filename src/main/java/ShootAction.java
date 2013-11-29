@@ -35,7 +35,7 @@ public class ShootAction extends Action {
     if (enemyTrooper.getType() == TrooperType.FIELD_MEDIC)
       points += 2;
 
-    return 2 * points;
+    return points * Math.min(6, 3 + 100 / (10 + oldHitPoints));
   }
 
   @Override

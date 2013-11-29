@@ -23,6 +23,12 @@ public class DefensePriority implements IPriority {
     assert (trooper.getStance() == Utils.getStance(stance));
     ArrayList<TrooperModel> enemies = environment.getEnemies();
     int damageToMe = countPotentialDamage(enemies);
+    int countOfIterationsISurvive = trooper.getHitpoints() / (damageToMe + 1);
+    if (countOfIterationsISurvive <= 1)
+      return 4 * damageToMe;
+    else if (countOfIterationsISurvive == 2)
+      return 2 * damageToMe;
+
     return damageToMe;
   }
 

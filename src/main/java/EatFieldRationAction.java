@@ -20,9 +20,9 @@ public class EatFieldRationAction extends Action {
     int newAP = oldAP + addingAP;
     trooper.setActionPoints(newAP);
     trooper.eatFieldRation();
-    int points = Math.min(newAP, trooper.getInitialActionPoints()) - oldAP;
+//    int points = Math.min(newAP, trooper.getInitialActionPoints()) - oldAP;
 
-    return points << 1;
+    return 0;
   }
 
   private int getAdditionalAP() {

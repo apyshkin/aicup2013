@@ -21,6 +21,7 @@ public final class DefenseStrategy implements Strategy {
     ++currentTime;
     initBattleMap(world);
     logger.info("I am " + new TrooperModel(trooper) + " and I want to move!");
+    logger.info("Iteration " + world.getMoveIndex());
     try {
       Environment currentEnvironment = createEnvironment(world, game, currentTime);
       if (nextTrooperMove(trooper))

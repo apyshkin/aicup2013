@@ -30,7 +30,6 @@ public class Analyzer {
       return new AttackTactics(environment);
     } else if (hasMaximalPoints()) { //todo
       logger.log(Level.INFO, "Choosing tactics: we have maximal points, so lets hide");
-      determineEnemy(battleHistory);
       return new PatrolTactics(environment);
     } else {
       logger.log(Level.INFO, "Choosing tactics: we have nothing to do, so lets go sightseeing");

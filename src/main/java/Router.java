@@ -11,7 +11,7 @@ public class Router implements IRouter {
   private static boolean initialized = false;
 
   private static MapCell[] initCorners() {
-    return new MapCell[] {myCorner, myCorner.reflectX(), center,
+    return new MapCell[] {myCorner, center, myCorner.reflectX(),
             myCorner.reflectXY(), myCorner.reflectY(), center};
   }
 

@@ -24,7 +24,7 @@ public class HealAction extends Action {
     patient.setHitpoints(newHitPoints);
     int points = Math.min(newHitPoints, patient.getMaximalHitpoints()) - oldHitPoints;
 
-    return 6 * points;
+    return points * (4 + oldHitPoints / (oldHitPoints + 10));
   }
 
   private int getAdditionalHitPoints(TrooperModel trooper, TrooperModel patient) {

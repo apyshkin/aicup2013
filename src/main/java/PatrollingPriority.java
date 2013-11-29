@@ -63,11 +63,11 @@ public class PatrollingPriority implements IPriority {
     final BattleMap battleMap = environment.getBattleMap();
     final MapCell checkPoint = router.getCheckPoint();
 
-    int distanceToCheckPoint = battleMap.getDistance(startX, startY, checkPoint.getX(), checkPoint.getY());
+    int distanceFromStartToCP = battleMap.getDistance(startX, startY, checkPoint.getX(), checkPoint.getY());
     int distanceFromHereToCP = battleMap.getDistance(x, y, checkPoint.getX(), checkPoint.getY());
-    int points = distanceToCheckPoint - distanceFromHereToCP;
+    int points = distanceFromStartToCP - distanceFromHereToCP;
 
-    int penalty = (TrooperStance.STANDING.ordinal() - stance) * 10;
+    int penalty = (TrooperStance.STANDING.ordinal() - stance) * 1;
     TrooperModel leader = environment.getMyTeam().getLeader();
     if (trooper != leader) {
       penalty += countStuckPenalty(x, y, leader);
@@ -79,19 +79,35 @@ public class PatrollingPriority implements IPriority {
   private int countStuckPenalty(int x, int y, TrooperModel leader) {
     final PathFinder pathFinder = environment.getBattleMap().getPathFinder();
     final MapCell checkPoint = router.getCheckPoint();
-    int penalty = 0;
 
-    obstacles[x][y] = true;
     final int distanceFromLeaderToMe = distancesLeaderToAll[x][y];
     final int distanceFromCPToMe = distancesCPToAll[x][y];
-    boolean[][] routeCells = initRouteCells(leader, checkPoint, distanceFromLeaderToMe, distanceFromCPToMe);
+    if (!checkPointIsOnTheRoute(checkPoint, distanceFromLeaderToMe, distanceFromCPToMe))
+      return 0;
 
-    int distance = pathFinder.countDistanceToMarkedCellsWithObstacles(leader.getX(), leader.getY(), obstacles, routeCells, distanceFromLeaderToMe + 1);
-    if (distance > distanceFromLeaderToMe + 1) {
+    obstacles[x][y] = true;
+    int penalty = 0;
+    boolean[][] routeCells = initRouteCells(leader, checkPoint, distanceFromLeaderToMe, distanceFromCPToMe);
+    routeCells[x][y] = false;
+
+    int distance = pathFinder.countDistanceToMarkedCellsWithObstacles(leader.getX(), leader.getY(),
+            obstacles, routeCells, distanceFromLeaderToMe);
+    if (distance > distanceFromLeaderToMe) {
       penalty = 20 - distanceFromLeaderToMe;
     }
     obstacles[x][y] = false;
     return penalty;
+  }
+
+  private boolean checkPointIsOnTheRoute(MapCell checkPoint, int distanceFromLeaderToMe, int distanceFromCPToMe) {
+    int distanceFromLeaderToCP = distancesLeaderToAll[checkPoint.getX()][checkPoint.getY()];
+    return distanceFromLeaderToMe + distanceFromCPToMe == distanceFromLeaderToCP;
+  }
+
+  private boolean checkCandidate(int x, int y, MapCell checkPoint, int distanceFromLeaderToMe, int distanceFromCPToMe) {
+    final BattleMap battleMap = environment.getBattleMap();
+    return battleMap.getDistance(x, y, leader.getX(), leader.getY()) == distanceFromLeaderToMe
+            && battleMap.getDistance(x, y, checkPoint.getX(), checkPoint.getY()) == distanceFromCPToMe;
   }
 
   private boolean[][] initObstaclesCells(TrooperModel leader) {
@@ -107,8 +123,8 @@ public class PatrollingPriority implements IPriority {
     return obstacles;
   }
 
-  private boolean[][] initRouteCells(TrooperModel leader, MapCell checkPoint, int distanceFromHereToLeader, int distanceFromHereToCP) {
-    final BattleMap battleMap = environment.getBattleMap();
+  private boolean[][] initRouteCells(TrooperModel leader, MapCell checkPoint, int distanceFromLeaderToMe,
+                                     int distanceFromCPToMe) {
     final int width = environment.getWorld().getWidth();
     final int height = environment.getWorld().getHeight();
 
@@ -119,8 +135,7 @@ public class PatrollingPriority implements IPriority {
       for (int j = 0; j < height; ++j)
         if (environment.getCellChecker().cellIsFree(i, j))
 //        if (reachableCells[i][j])
-          if (battleMap.getDistance(i, j, leader.getX(), leader.getY()) == distanceFromHereToLeader + 1 &&
-                  battleMap.getDistance(i, j, checkPoint.getX(), checkPoint.getY()) == distanceFromHereToCP - 1)
+          if (checkCandidate(i, j, checkPoint, distanceFromLeaderToMe, distanceFromCPToMe))
             routeCells[i][j] = true;
           else
             routeCells[i][j] = false;
