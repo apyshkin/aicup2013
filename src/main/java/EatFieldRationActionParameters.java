@@ -10,6 +10,16 @@ public class EatFieldRationActionParameters extends DestinationActionParameters 
   }
 
   @Override
+  public int getX() {
+    return trooper.getX();
+  }
+
+  @Override
+  public int getY() {
+    return trooper.getY();
+  }
+
+  @Override
   public String toString() {
     return this.trooper + " eating field ration at " + getX() + " " + getY();
   }

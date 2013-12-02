@@ -1,8 +1,6 @@
 import model.ActionType;
 import model.Move;
 
-import java.util.logging.Logger;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -10,7 +8,7 @@ import java.util.logging.Logger;
  * Time: 10:09 PM
  * To change this template use File | Settings | File Templates.
  */
-public class EndTurnAction extends Action {
+public class EndTurnAction extends AbstractAction {
   protected EndTurnAction(Environment environment) {
     super(ActionType.END_TURN, new EndTurnActionChecker(environment), environment);
   }

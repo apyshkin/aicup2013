@@ -1,5 +1,3 @@
-import model.Move;
-
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -15,44 +13,30 @@ public abstract class TrooperStrategyAdapter implements ITrooperStrategy {
 
   protected Environment environment;
   protected TrooperModel trooper;
-  protected final Move move;
 
-  protected TrooperStrategyAdapter(Environment environment, TrooperModel trooper, Move move) {
+  protected TrooperStrategyAdapter(Environment environment, TrooperModel trooper) {
     this.environment = environment;
     this.trooper = trooper;
-    this.move = move;
   }
 
   @Override
-  public void setActionUnderTactics(AttackTactics tactics) {
-    setAction(countPriorities(getAttackCoefficients()));
+  public ActionSequence findOptimalActions(AttackTactics tactics) {
+    return findOptimalActions(countPriorities(getAttackCoefficients()));
   }
 
   @Override
-  public void setActionUnderTactics(PatrolTactics tactics) {
-    setAction(countPriorities(getPatrolCoefficients()));
+  public ActionSequence findOptimalActions(PatrolTactics tactics) {
+    return findOptimalActions(countPriorities(getPatrolCoefficients()));
   }
 
-  public void setAction(CellPriorities priorities) {
+  public ActionSequence findOptimalActions(CellPriorities priorities) {
     IActionsGenerator actionsGenerator = createActionsGenerator();
     TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
-
-    Pair<Action, IActionParameters> bestActionWithParams = algorithmChooser.findBest();
-
-    Action bestAction = bestActionWithParams.getKey();
-    IActionParameters bestParams = bestActionWithParams.getValue();
-    assert (bestAction != null && bestParams != null);
-    logger.info("Chosen action is " + bestAction + " " + bestParams);
-
-    try {
-      bestAction.act(bestParams, trooper, move);
-    } catch (InvalidActionException e) {
-      e.printStackTrace();
-    }
+    return algorithmChooser.findBestSequence();
   }
 
   protected CellPriorities countPriorities(CoefficientPack coefficientPack) {
-    PriorityWeightsFactory weightsFactory = new PriorityWeightsFactory(trooper, environment);
+    PriorityWeightsFactory weightsFactory = new PriorityWeightsFactory(environment, trooper);
     List<PriorityWeight> weightList = weightsFactory.createPriorityWeightsList(coefficientPack);
     PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, weightList);
     return priorityCalculator.getPriorities();

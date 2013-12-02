@@ -9,7 +9,7 @@ import model.Move;
  * Time: 4:54 AM
  * To change this template use File | Settings | File Templates.
  */
-public class MoveAction extends Action {
+public class MoveAction extends AbstractAction {
 
   public MoveAction(Environment env) {
     super(ActionType.MOVE, new MoveActionChecker(env), env);
@@ -18,19 +18,18 @@ public class MoveAction extends Action {
   @Override
   protected int innerActSimulating(IActionParameters params, TrooperModel trooper) {
     MoveActionParameters moveParams = (MoveActionParameters) params;
-    trooper.setX(moveParams.getX());
-    trooper.setY(moveParams.getY());
+    trooper.setX(trooper.getX() + moveParams.getDirection().getOffsetX());
+    trooper.setY(trooper.getY() + moveParams.getDirection().getOffsetY());
     return 0;
   }
 
   @Override
   protected void innerAct(IActionParameters params, TrooperModel trooper, Move move) {
     MoveActionParameters moveParams = (MoveActionParameters) params;
-    final int x = moveParams.getX();
-    final int y = moveParams.getY();
+    final int x = moveParams.getDirection().getOffsetX() + trooper.getX();
+    final int y = moveParams.getDirection().getOffsetY() + trooper.getY();
     move.setX(x);
     move.setY(y);
-    environment.visitCell(x, y);
   }
 
   @Override

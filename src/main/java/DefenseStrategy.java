@@ -1,5 +1,6 @@
 import model.*;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -13,75 +14,123 @@ public final class DefenseStrategy implements Strategy {
   private final static Logger logger = Logger.getLogger(DefenseStrategy.class.getName());
   private static BattleHistory battleHistory = new BattleHistory();
   private static BattleMap battleMap = null;
-  private static int currentTime = 0;
+  private static BattleState battleState = null;
+  private static Router router;
+  private static int currentMoveIndex = 0;
   private static Trooper lastTrooper = null;
+  private static Analyser analyser;
+  private final TimeCounter timeCounter = new TimeCounter();
 
   @Override
   public void move(Trooper trooper, World world, Game game, Move move) {
-    ++currentTime;
-    initBattleMap(world);
-    logger.info("I am " + new TrooperModel(trooper) + " and I want to move!");
-    logger.info("Iteration " + world.getMoveIndex());
+    initBattleMap(world, game);
+    initBattleState(world);
+    logger.info("");
+    logger.info("I AM " + new TrooperModel(trooper) + " and I want to move!" + "ITERATION " + world.getMoveIndex());
     try {
-      Environment currentEnvironment = createEnvironment(world, game, currentTime);
-      if (nextTrooperMove(trooper))
-        updateHistory(currentEnvironment);
-      Analyzer analyzer = new Analyzer(currentEnvironment);
-      ITactics chosenTactics = analyzer.chooseTactics(battleHistory);
-      setAction(currentEnvironment.clone(), trooper, chosenTactics, move); // clone is important
+      timeCounter.reset();
+      initRouter();
+      Environment environment = createEnvironment(trooper, world, game, router, world.getMoveIndex());
+      updateHistory(environment);
+      updateAnalyzer(trooper, environment);
+      currentMoveIndex = world.getMoveIndex();
+
+      ITactics chosenTactics = analyser.chooseTactics();
+
+      TrooperModel myTrooper = environment.getMyTeam().getMyTrooper(trooper.getType());
+      Pair<AbstractAction, IActionParameters> actionPair = findAction(environment.clone(), myTrooper, chosenTactics); // clone is important
+      execute(move, myTrooper, actionPair);
 
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  private void initBattleMap(World world) {
-    if (battleMap == null)
-      battleMap = new BattleMap(world, new CellChecker(world));
+  private void initBattleState(World world) {
+    if (battleState == null) {
+      long myId = 0;
+      ArrayList<TrooperModel> visTroopers = battleMap.getVisibleTroopers();
+      int teamSize = 0;
+      for (TrooperModel trooper : visTroopers)
+        if (trooper.isTeammate()) {
+          myId = trooper.getPlayerId();
+          ++teamSize;
+        }
+      battleState = new BattleState(world.getPlayers(), myId, teamSize);
+    }
+  }
 
+  private void updateAnalyzer(Trooper trooper, Environment environment) {
+    World world = environment.getWorld();
+    if (nextTrooperMove(trooper, world.getMoveIndex()))
+      analyser = new Analyser(environment, battleHistory);
+    else
+      analyser.setEnvironment(environment);
+  }
+
+  private void initRouter() {
+    if (router == null) {
+      router = new Router(battleMap);
+      logger.warning("Router is null");
+    }
+    if (router.checkPointWasReached()) {
+      logger.info("Checkpoint was reached, going to the next one");
+      router.nextCheckPoint();
+    }
+    logger.info("Current checkpoint is " + router.getCheckPoint());
+  }
+
+  private void execute(Move move, TrooperModel myTrooper, Pair<AbstractAction, IActionParameters> actionPair) throws InvalidActionException {
+    AbstractAction bestAction = actionPair.getKey();
+    IActionParameters bestParams = actionPair.getValue();
+    logger.info("Chosen action is " + bestAction + " " + bestParams);
+    bestAction.act(bestParams, myTrooper, move);
+  }
+
+  private void initBattleMap(World world, Game game) {
+    if (battleMap == null)
+      battleMap = new BattleMap(world, game, new CellChecker(world));
     battleMap.update(world);
   }
 
-  private void setAction(Environment environment, Trooper self, ITactics chosenTactics, Move move) throws InvalidTrooperTypeException {
-    TrooperModel myTrooper = environment.getMyTeam().getMyTrooper(self.getType());
-
-    if (environment.getMyTeam().getLeader() == myTrooper)
-      chosenTactics.setAction(new CommanderStrategy(environment, myTrooper, move));
+  private Pair<AbstractAction, IActionParameters> findAction(Environment environment, TrooperModel trooper, ITactics chosenTactics) throws InvalidTrooperTypeException {
+    if (environment.getMyTeam().getLeader() == trooper)
+      return chosenTactics.findBestAction(new CommanderStrategy(environment, trooper));
     else
-      switch (myTrooper.getType()) {
+      switch (trooper.getType()) {
         case COMMANDER:
-          chosenTactics.setAction(new CommanderStrategy(environment, myTrooper, move));
-          break;
+          return chosenTactics.findBestAction(new CommanderStrategy(environment, trooper));
         case SOLDIER:
-          chosenTactics.setAction(new SoldierStrategy(environment, myTrooper, move));
-          break;
-//        chosenTactics.setAction(new SoldierStrategy(environment, myTrooper, move));
+          return chosenTactics.findBestAction(new SoldierStrategy(environment, trooper));
         case FIELD_MEDIC:
-          chosenTactics.setAction(new MedicStrategy(environment, myTrooper, move));
-          break;
+          return chosenTactics.findBestAction(new MedicStrategy(environment, trooper));
         case SNIPER:
-          chosenTactics.setAction(new SoldierStrategy(environment, myTrooper, move));
-          break;
+          return chosenTactics.findBestAction(new SoldierStrategy(environment, trooper));
+        case SCOUT:
+          return chosenTactics.findBestAction(new SoldierStrategy(environment, trooper));
         default:
-          throw new InvalidTrooperTypeException(myTrooper.getType().toString());
+          throw new InvalidTrooperTypeException();
       }
   }
 
   private void updateHistory(Environment environment) {
-      battleHistory.add(environment);
+    battleHistory.add(environment);
   }
 
-  private boolean nextTrooperMove(Trooper self) {
-    if (self == lastTrooper) {
-      return self.getActionPoints() > lastTrooper.getActionPoints();
+  private boolean nextTrooperMove(Trooper trooper, int newMoveIndex) {
+    if (lastTrooper != null && trooper.getType() == lastTrooper.getType() && currentMoveIndex == newMoveIndex) {
+      return false;
     }
-
-    lastTrooper = self;
+    lastTrooper = trooper;
     return true;
   }
 
-
-  private Environment createEnvironment(World world, Game game, int currentTime) {
-    return new Environment(battleMap, world, game, battleMap.getPathFinder(), currentTime);
+  private Environment createEnvironment(Trooper trooper, World world, Game game, Router router, int currentTime) {
+    ArrayList<TrooperModel> myTroopers = battleMap.getVisibleTroopers();
+    for (TrooperModel trooper1 : myTroopers)
+      if (trooper1.isTeammate() && trooper1.getType() == trooper.getType())
+        return new Environment(trooper1, battleMap, battleState, world, game, router, battleMap.getPathFinder(), currentTime);
+    assert false;
+    return null;
   }
 }

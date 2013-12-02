@@ -1,20 +1,14 @@
 import model.World;
 
 public class MapCell {
-  private World world;
+  private final int width;
+  private final int height;
   private final int x;
   private final int y;
 
-  private int getWidth() {
-    return world.getWidth();
-  }
-
-  private int getHeight() {
-    return world.getHeight();
-  }
-
-  public MapCell(World world, int x, int y) {
-    this.world = world;
+  public MapCell(int width, int height, int x, int y) {
+    this.width = width;
+    this.height = height;
     this.x = x;
     this.y = y;
   }
@@ -36,15 +30,15 @@ public class MapCell {
   }
 
   public MapCell reflectX() {
-    return new MapCell(world, x, getHeight() - 1 - y);
+    return new MapCell(width, height, x, height - 1 - y);
   }
 
   public MapCell reflectY() {
-    return new MapCell(world, getWidth() - 1 - x, y);
+    return new MapCell(width, height, width - 1 - x, y);
   }
 
   public MapCell reflectXY() {
-    return new MapCell(world, getWidth() - 1 - x, getHeight() - 1 - y);
+    return new MapCell(width, height, width - 1 - x, height - 1 - y);
   }
 
   @Override

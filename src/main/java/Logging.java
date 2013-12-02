@@ -11,7 +11,7 @@ import java.util.logging.*;
  * To change this template use File | Settings | File Templates.
  */
 public class Logging {
-  private final static Logger logger = Logger.getLogger("");
+  private final static Logger logger = LogManager.getLogManager().getLogger("");
   private static ConsoleHandler handler = null;
 
   public static void init(Level level){
@@ -31,6 +31,8 @@ public class Logging {
   public Logging(Level level) {
     init(level);
     logger.setLevel(level);
+    for (Handler h : logger.getHandlers())
+      h.setLevel(level);
     logger.log(Level.INFO, "Initializing Logger");
   }
 }

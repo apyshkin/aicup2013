@@ -8,7 +8,7 @@ import model.Trooper;
  * Time: 7:16 AM
  * To change this template use File | Settings | File Templates.
  */
-public class DestinationActionParameters implements IActionParameters {
+public abstract class DestinationActionParameters implements IActionParameters {
 
   private int x;
   private int y;

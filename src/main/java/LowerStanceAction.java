@@ -8,7 +8,7 @@ import model.Move;
  * Time: 4:58 AM
  * To change this template use File | Settings | File Templates.
  */
-public class LowerStanceAction extends Action {
+public class LowerStanceAction extends AbstractAction {
   public LowerStanceAction(Environment environment) {
     super(ActionType.LOWER_STANCE, new LowerStanceActionChecker(environment), environment);
   }

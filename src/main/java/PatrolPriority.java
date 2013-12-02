@@ -7,37 +7,44 @@ import model.TrooperStance;
  * Time: 3:52 AM
  * To change this template use File | Settings | File Templates.
  */
-public class PatrollingPriority implements IPriority {
+public class PatrolPriority implements IPriority {
   private final Environment environment;
   private final TrooperModel leader;
-  private Router router;
   private final TrooperModel trooper;
   private final int startX;
   private final int startY;
-  private final boolean[][] reachableCells;
+  private final Router router;
+  private int[][] answer;
+  private boolean[][] isCounted;
   private boolean[][] routeCells;
   private boolean[][] obstacles;
   private int[][] distancesCPToAll;
   private int[][] distancesLeaderToAll;
+  private int distanceFromLeaderToCP;
 
-  public PatrollingPriority(Environment environment, TrooperModel trooper) {
+  public PatrolPriority(Environment environment, TrooperModel trooper) {
     this.environment = environment;
+    this.router = environment.getRouter();
     this.trooper = trooper;
     startX = trooper.getX();
     startY = trooper.getY();
     leader = environment.getMyTeam().getLeader();
-    initRouter(environment);
-    reachableCells = environment.getReachableCells(leader);
+    answer = new int[environment.getWorld().getWidth()][environment.getWorld().getHeight()];
+    isCounted = new boolean[environment.getWorld().getWidth()][environment.getWorld().getHeight()];
     obstacles = initObstaclesCells(leader);
     distancesCPToAll = initCPToAllDistances();
     distancesLeaderToAll = initLeaderToAllDistances();
+
+    MapCell checkPoint = this.router.getCheckPoint();
+    distanceFromLeaderToCP = environment.getBattleMap().getPathFinder().countDistanceToCellWithObstacles(leader.getX(), leader.getY(),
+            checkPoint.getY(), checkPoint.getX(), obstacles, 100);
   }
 
   private int[][] initCPToAllDistances() {
     int[][] distancesCPToAll = new int[environment.getWorld().getWidth()][environment.getWorld().getHeight()];
     final PathFinder pathFinder = environment.getBattleMap().getPathFinder();
     MapCell checkPoint = router.getCheckPoint();
-    pathFinder.findDistancesWithObstacles(checkPoint.getX(), checkPoint.getY(), Utils.INFINITY, obstacles, distancesCPToAll);
+    pathFinder.findDistancesWithObstacles(checkPoint.getX(), checkPoint.getY(), distancesCPToAll, obstacles, Utils.INFINITY);
     return distancesCPToAll;
   }
 
@@ -45,35 +52,41 @@ public class PatrollingPriority implements IPriority {
     int[][] distancesLeaderToAll = new int[environment.getWorld().getWidth()][environment.getWorld().getHeight()];
     if (trooper != leader) {
       final PathFinder pathFinder = environment.getBattleMap().getPathFinder();
-      pathFinder.findDistancesWithObstacles(leader.getX(), leader.getY(), Utils.INFINITY, obstacles, distancesLeaderToAll);
+      pathFinder.findDistancesWithObstacles(leader.getX(), leader.getY(), distancesLeaderToAll, obstacles, Utils.INFINITY);
     }
     return distancesLeaderToAll;
   }
 
-  private void initRouter(Environment environment) {
-    router = new Router(environment);
-    if (router.checkPointWasReached()) {
-      router.nextCheckPoint();
-    }
-  }
-
   @Override
   public int getPriority(int x, int y, int stance) {
-    assert (x == trooper.getX() && y == trooper.getY());
-    final BattleMap battleMap = environment.getBattleMap();
-    final MapCell checkPoint = router.getCheckPoint();
+    int ans = 0;
+    if (isCounted[x][y])
+      ans = answer[x][y];
+    else {
 
-    int distanceFromStartToCP = battleMap.getDistance(startX, startY, checkPoint.getX(), checkPoint.getY());
-    int distanceFromHereToCP = battleMap.getDistance(x, y, checkPoint.getX(), checkPoint.getY());
-    int points = distanceFromStartToCP - distanceFromHereToCP;
+      final BattleMap battleMap = environment.getBattleMap();
+      final MapCell checkPoint = router.getCheckPoint();
 
-    int penalty = (TrooperStance.STANDING.ordinal() - stance) * 1;
-    TrooperModel leader = environment.getMyTeam().getLeader();
-    if (trooper != leader) {
-      penalty += countStuckPenalty(x, y, leader);
+      int distanceFromStartToCP = battleMap.getDistance(startX, startY, checkPoint.getX(), checkPoint.getY());
+      int distanceFromHereToCP = battleMap.getDistance(x, y, checkPoint.getX(), checkPoint.getY());
+      int points = distanceFromStartToCP - distanceFromHereToCP;
+
+      int penalty = 0;
+      TrooperModel leader = environment.getMyTeam().getLeader();
+      if (trooper != leader) {
+        penalty += countStuckPenalty(x, y, leader);
+      }
+
+      ans = points - penalty;
+
+      isCounted[x][y] = true;
+      answer[x][y] = ans;
     }
+    return ans - countStancePenalty(stance);
+  }
 
-    return points - penalty;
+  private int countStancePenalty(int stance) {
+    return (TrooperStance.STANDING.ordinal() - stance) * 2;
   }
 
   private int countStuckPenalty(int x, int y, TrooperModel leader) {
@@ -85,15 +98,12 @@ public class PatrollingPriority implements IPriority {
     if (!checkPointIsOnTheRoute(checkPoint, distanceFromLeaderToMe, distanceFromCPToMe))
       return 0;
 
-    obstacles[x][y] = true;
     int penalty = 0;
-    boolean[][] routeCells = initRouteCells(leader, checkPoint, distanceFromLeaderToMe, distanceFromCPToMe);
-    routeCells[x][y] = false;
-
-    int distance = pathFinder.countDistanceToMarkedCellsWithObstacles(leader.getX(), leader.getY(),
-            obstacles, routeCells, distanceFromLeaderToMe);
-    if (distance > distanceFromLeaderToMe) {
-      penalty = 20 - distanceFromLeaderToMe;
+    obstacles[x][y] = true;
+    int distance = pathFinder.countDistanceToCellWithObstacles(leader.getX(), leader.getY(),
+            checkPoint.getY(), checkPoint.getX(), obstacles, Utils.INFINITY);
+    if (distance > distanceFromLeaderToCP) {
+      penalty = 30 - distanceFromLeaderToMe;
     }
     obstacles[x][y] = false;
     return penalty;

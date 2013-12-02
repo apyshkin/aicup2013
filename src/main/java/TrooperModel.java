@@ -198,13 +198,19 @@ public class TrooperModel extends UnitModel implements Cloneable {
   }
 
   @Override
+  public int hashCode() {
+    return (int) ((type.ordinal() * 5 + playerId) % 1000003);
+  }
+
+  @Override
   public boolean equals(Object object) {
     assert (object instanceof TrooperModel);
     TrooperModel another = (TrooperModel) object;
-    return  getX() == another.getX() && getY() == another.getY() && type == another.type && stance == another.stance &&
+    return  /*getX() == another.getX() && getY() == another.getY() && */ type == another.type && playerId == another.playerId
+            /*&& stance == another.stance &&
             hitpoints == another.hitpoints && playerId == another.playerId && actionPoints == another.actionPoints &&
             holdingFieldRation == another.holdingFieldRation && holdingGrenade == another.holdingGrenade &&
-            holdingMedkit == another.holdingMedkit;
+            holdingMedkit == another.holdingMedkit*/;
   }
 
   @Override
@@ -244,5 +250,24 @@ public class TrooperModel extends UnitModel implements Cloneable {
   public void turnToEnemy() {
     teammate = false;
     playerId++;
+  }
+
+  public boolean exactSameTrooper(TrooperModel another) {
+    return  getX() == another.getX() && getY() == another.getY() &&
+            type == another.type && playerId == another.playerId && stance == another.stance &&
+            hitpoints == another.hitpoints && playerId == another.playerId && actionPoints == another.actionPoints &&
+            holdingFieldRation == another.holdingFieldRation && holdingGrenade == another.holdingGrenade &&
+            holdingMedkit == another.holdingMedkit;
+  }
+
+  public void update(TrooperModel trooper) {
+    setX(trooper.getX());
+    setY(trooper.getY());
+    stance = trooper.getStance();
+    hitpoints = trooper.getHitpoints();
+    actionPoints = trooper.getActionPoints();
+    holdingGrenade = trooper.isHoldingGrenade();
+    holdingMedkit = trooper.isHoldingMedkit();
+    holdingFieldRation = trooper.isHoldingFieldRation();
   }
 }

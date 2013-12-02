@@ -1,5 +1,4 @@
 import model.Direction;
-import model.Trooper;
 
 /**
  * Created with IntelliJ IDEA.
@@ -8,11 +7,10 @@ import model.Trooper;
  * Time: 4:44 AM
  * To change this template use File | Settings | File Templates.
  */
-public final class MoveActionParameters extends DestinationActionParameters {
+public final class MoveActionParameters implements IActionParameters {
   private Direction direction;
 
-  public MoveActionParameters(TrooperModel trooper, Direction direction) {
-    super(trooper, direction);
+  public MoveActionParameters(Direction direction) {
     assert(direction != Direction.CURRENT_POINT);
     this.direction = direction;
   }
@@ -21,4 +19,8 @@ public final class MoveActionParameters extends DestinationActionParameters {
     return direction;
   }
 
+  @Override
+  public String toString() {
+    return "dest " + direction;
+  }
 }

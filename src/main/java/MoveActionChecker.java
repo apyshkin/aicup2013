@@ -1,3 +1,5 @@
+import model.Direction;
+
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -7,23 +9,24 @@
  */
 public final class MoveActionChecker extends ActionChecker {
 
-  public MoveActionChecker(Environment env)
-  {
+  public MoveActionChecker(Environment env) {
     super(env);
   }
 
-  public boolean checkActionValidity(IActionParameters params, TrooperModel trooper)
-  {
+  public boolean checkActionValidity(IActionParameters params, TrooperModel trooper) {
     MoveActionParameters moveParams = (MoveActionParameters) params;
+    Direction direction = moveParams.getDirection();
+    int x = trooper.getX() + direction.getOffsetX();
+    int y = trooper.getY() + direction.getOffsetY();
     if (countActionCost(trooper) > trooper.getActionPoints())
       return false;
-    if (!checkCellIsWithinBoundaries(moveParams.getX(), moveParams.getY()))
+    if (!checkCellIsWithinBoundaries(x, y))
       return false;
-    if (!checkCellsAreNeighbours(moveParams.getX(), moveParams.getY(), trooper.getX(), trooper.getY()))
+    if (!checkCellsAreNeighbours(x, y, trooper.getX(), trooper.getY()))
       return false;
-    if (!checkCellIsFree(moveParams.getX(), moveParams.getY()))
+    if (!checkCellIsFree(x, y))
       return false;
-    if (!checkCellHasNoMen(moveParams.getX(), moveParams.getY()))
+    if (!checkCellHasNoMen(x, y))
       return false;
 
     return true;
@@ -39,7 +42,7 @@ public final class MoveActionChecker extends ActionChecker {
       case PRONE:
         return environment.getGame().getProneMoveCost();
       default:
-        assert(false);
+        assert (false);
         break;
     }
     return 0;

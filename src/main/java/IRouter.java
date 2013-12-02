@@ -9,4 +9,5 @@ public interface IRouter {
   public MapCell getCheckPoint();
   public void nextCheckPoint();
   public boolean checkPointWasReached();
+  public void setCheckPoint(MapCell checkPoint);
 }

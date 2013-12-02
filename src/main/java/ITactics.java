@@ -8,6 +8,5 @@ import model.Trooper;
  * To change this template use File | Settings | File Templates.
  */
 interface ITactics {
-  void setAction(ITrooperStrategy trooper);
-//  CellPriorities generateCellPriorities(TrooperModel trooper);
+  Pair<AbstractAction, IActionParameters> findBestAction(ITrooperStrategy trooperStrategy);
 }

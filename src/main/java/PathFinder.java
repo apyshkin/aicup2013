@@ -1,8 +1,5 @@
 import model.World;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -16,31 +13,46 @@ public class PathFinder {
   private final CellChecker cellChecker;
   private World world;
 
+  private final boolean[][] noObstacles;
+  private static final int MAX_CAPACITY = 30 * 20;
+  private static final int[] deltaX = {-1, 0, 1, 0};
+  private static final int[] deltaY = {0, 1, 0, -1};
+  private IntQueue xQueue;
+  private IntQueue yQueue;
+
   public PathFinder(World world, CellChecker cellChecker) {
     this.world = world;
     this.cellChecker = cellChecker;
     noObstacles = new boolean[world.getWidth()][world.getHeight()];
+    init();
   }
 
-  private final boolean[][] noObstacles;
+  private void init() {
+    xQueue = new IntQueue(MAX_CAPACITY);
+    yQueue = new IntQueue(MAX_CAPACITY);
+  }
 
   public void findDistances(int xStart, int yStart, int[][] distances) {
-    findDistancesWithObstacles(xStart, yStart, Utils.INFINITY, noObstacles, distances);
+    findDistancesWithObstacles(xStart, yStart, distances, noObstacles, Utils.INFINITY);
   }
 
   public int[][] findDistances(int xStart, int yStart) {
-    return findDistancesWithObstacles(xStart, yStart, Utils.INFINITY, noObstacles);
+    return findDistancesWithObstacles(xStart, yStart, noObstacles, Utils.INFINITY);
   }
 
-  public void findDistancesWithObstacles(int xStart, int yStart, int maxRadius, boolean[][] obstacles, int[][] distances) {
+  public int[][] findDistancesWithObstacles(int xStart, int yStart, boolean[][] obstacles, int maxRadius) {
+    int[][] distances = initDistances(xStart, yStart);
+    findDistancesWithObstacles(xStart, yStart, distances, obstacles, maxRadius);
+    return distances;
+  }
+
+  public void findDistancesWithObstacles(int xStart, int yStart, int[][] distances, boolean[][] obstacles, int maxRadius) {
     boolean[][] was = initWas(xStart, yStart);
-    Queue<Integer> xQueue = new LinkedList<>();
-    Queue<Integer> yQueue = new LinkedList<>();
+    xQueue.reset();
+    yQueue.reset();
     xQueue.add(xStart);
     yQueue.add(yStart);
     was[xStart][yStart] = true;
-    final int[] deltaX = {-1, 0, 1, 0};
-    final int[] deltaY = {0, 1, 0, -1};
 
     while (!(xQueue.isEmpty() && yQueue.isEmpty())) {
       int cellX = xQueue.poll();
@@ -69,23 +81,15 @@ public class PathFinder {
     }
   }
 
-  public int[][] findDistancesWithObstacles(int xStart, int yStart, int maxRadius, boolean[][] obstacles) {
-    int[][] distances = initDistances(xStart, yStart);
-    findDistancesWithObstacles(xStart, yStart, maxRadius, obstacles, distances);
-    return distances;
-  }
-
-  public int countDistanceToCellWithObstacles(int xStart, int yStart, boolean[][] obstacles,
-                                              int xEnd, int yEnd, int maxRadius) {
+  public int countDistanceToCellWithObstacles(int xStart, int yStart, int yEnd, int xEnd, boolean[][] obstacles,
+                                              int maxRadius) {
     boolean[][] was = initWas(xStart, yStart);
     int[][] distances = initDistances(xStart, yStart);
-    Queue<Integer> xQueue = new LinkedList<>();
-    Queue<Integer> yQueue = new LinkedList<>();
+    xQueue.reset();
+    yQueue.reset();
     xQueue.add(xStart);
     yQueue.add(yStart);
     was[xStart][yStart] = true;
-    final int[] deltaX = {-1, 0, 1, 0};
-    final int[] deltaY = {0, 1, 0, -1};
 
     while (!(xQueue.isEmpty() && yQueue.isEmpty())) {
       int cellX = xQueue.poll();
@@ -123,14 +127,11 @@ public class PathFinder {
                                                      boolean[][] markedCells, int maxRadius) {
     int[][] distances = initDistances(xStart, yStart);
     boolean[][] was = initWas(xStart, yStart);
-    Queue<Integer> xQueue = new LinkedList<>();
-    Queue<Integer> yQueue = new LinkedList<>();
+    xQueue.reset();
+    yQueue.reset();
     xQueue.add(xStart);
     yQueue.add(yStart);
     was[xStart][yStart] = true;
-    final int[] deltaX = {-1, 0, 1, 0};
-    final int[] deltaY = {0, 1, 0, -1};
-
     while (!(xQueue.isEmpty() && yQueue.isEmpty())) {
       int cellX = xQueue.poll();
       int cellY = yQueue.poll();
@@ -153,6 +154,46 @@ public class PathFinder {
           distances[neighCellX][neighCellY] = distances[cellX][cellY] + 1;
 
           if (markedCells[neighCellX][neighCellY])
+            return distances[neighCellX][neighCellY];
+
+          xQueue.add(neighCellX);
+          yQueue.add(neighCellY);
+        }
+      }
+    }
+    return maxRadius + 1;
+  }
+
+  public int countDistanceToCellWithObstacles(int xStart, int yStart, int xEnd, int yEnd, int obstacleX, int obstacleY, int maxRadius) {
+    int[][] distances = initDistances(xStart, yStart);
+    boolean[][] was = initWas(xStart, yStart);
+    xQueue.reset();
+    yQueue.reset();
+    xQueue.add(xStart);
+    yQueue.add(yStart);
+    was[xStart][yStart] = true;
+    while (!(xQueue.isEmpty() && yQueue.isEmpty())) {
+      int cellX = xQueue.poll();
+      int cellY = yQueue.poll();
+      if (distances[cellX][cellY] >= maxRadius)
+        continue;
+
+      if (obstacleX == cellX && obstacleY == cellY)
+        continue;
+
+      for (int i = 0; i < 4; ++i) {
+        int dx = deltaX[i];
+        int dy = deltaY[i];
+        int neighCellX = cellX + dx;
+        int neighCellY = cellY + dy;
+        if (!cellChecker.cellIsWithinBoundaries(neighCellX, neighCellY))
+          continue;
+
+        if (cellChecker.cellIsFree(neighCellX, neighCellY) && !was[neighCellX][neighCellY]) {
+          was[neighCellX][neighCellY] = true;
+          distances[neighCellX][neighCellY] = distances[cellX][cellY] + 1;
+
+          if (neighCellX == xEnd && neighCellY == yEnd)
             return distances[neighCellX][neighCellY];
 
           xQueue.add(neighCellX);
@@ -189,46 +230,37 @@ public class PathFinder {
     return was;
   }
 
-  public int countDistanceToCellWithObstacles(int xStart, int yStart, int xEnd, int yEnd, int obstacleX, int obstacleY, int maxRadius) {
-    int[][] distances = initDistances(xStart, yStart);
-    boolean[][] was = initWas(xStart, yStart);
-    Queue<Integer> xQueue = new LinkedList<>();
-    Queue<Integer> yQueue = new LinkedList<>();
-    xQueue.add(xStart);
-    yQueue.add(yStart);
-    was[xStart][yStart] = true;
-    final int[] deltaX = {-1, 0, 1, 0};
-    final int[] deltaY = {0, 1, 0, -1};
+}
 
-    while (!(xQueue.isEmpty() && yQueue.isEmpty())) {
-      int cellX = xQueue.poll();
-      int cellY = yQueue.poll();
-      if (distances[cellX][cellY] >= maxRadius)
-        continue;
+class IntQueue {
+  int[] queue;
+  int l;
+  int r;
 
-      if (obstacleX == cellX && obstacleY == cellY)
-        continue;
+  public IntQueue(int capacity) {
+    init(capacity);
+  }
 
-      for (int i = 0; i < 4; ++i) {
-        int dx = deltaX[i];
-        int dy = deltaY[i];
-        int neighCellX = cellX + dx;
-        int neighCellY = cellY + dy;
-        if (!cellChecker.cellIsWithinBoundaries(neighCellX, neighCellY))
-          continue;
+  private void init(int capacity) {
+    queue = new int[capacity];
+    l = r = 0;
+  }
 
-        if (cellChecker.cellIsFree(neighCellX, neighCellY) && !was[neighCellX][neighCellY]) {
-          was[neighCellX][neighCellY] = true;
-          distances[neighCellX][neighCellY] = distances[cellX][cellY] + 1;
+  public int poll() {
+    assert !isEmpty();
+    return queue[l++];
+  }
 
-          if (neighCellX == xEnd && neighCellY == yEnd)
-            return distances[neighCellX][neighCellY];
+  public void add(int elem) {
+    assert r < queue.length;
+    queue[r++] = elem;
+  }
 
-          xQueue.add(neighCellX);
-          yQueue.add(neighCellY);
-        }
-      }
-    }
-    return maxRadius + 1;
+  public boolean isEmpty() {
+    return l == r;
+  }
+
+  public void reset() {
+    l = r = 0;
   }
 }

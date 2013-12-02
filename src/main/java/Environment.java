@@ -1,6 +1,7 @@
 import model.*;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,23 +11,54 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public final class Environment implements Cloneable {
+  private final static Logger logger = Logger.getLogger(Environment.class.getName());
 
   private final World world;
   private final Game game;
   private final Team myTeam;
   private final CellChecker cellChecker;
-  private final int currentTime;
   private final PathFinder pathFinder;
-  private BattleMap battleMap;
+  private final int currentTime;
 
-  public Environment(BattleMap battleMap, World world, Game game, PathFinder pathFinder, int currentTime) {
+  private final BattleMap battleMap;
+  private final Router router;
+  private final TrooperModel currentTrooper;
+  private final BattleState battleState;
+
+  public Environment(TrooperModel trooper, BattleMap battleMap, BattleState battleState, World world, Game game, Router router, PathFinder pathFinder, int currentTime) {
     this.battleMap = battleMap;
+    this.battleState = battleState;
     this.world = world;
     this.game = game;
+    this.router = router;
     this.myTeam = new Team(findMyTroopers());
     this.cellChecker = new CellChecker(world);
     this.pathFinder = pathFinder;
     this.currentTime = currentTime;
+    currentTrooper = myTeam.getMyTrooper(trooper.getType());
+  }
+
+//  private boolean[][] getCellsToCount(TrooperModel myTrooper) {
+//    boolean[][] answer = new boolean[world.getWidth()][world.getHeight()];
+//    for (int i = 0; i < world.getWidth(); ++i)
+//      for (int j = 0; j < world.getHeight(); ++j)
+//        if (cellChecker.cellIsFree(i, j) && canTrooperReachCell(myTrooper, i, j)) {
+//          int x = (i >= world.getWidth() >> 1) ? world.getWidth() - 1 - i : i;
+//          int y = (j >= world.getHeight() >> 1) ? world.getHeight() - 1 - j : j;
+//          answer[x][y] = true;
+//        }
+//
+//    for (TrooperModel trooper : getMyTroopers()) {
+//      int x = (trooper.getX() >= world.getWidth() >> 1) ? world.getWidth() - 1 - trooper.getX() : trooper.getX();
+//      int y = (trooper.getY() >= world.getHeight() >> 1) ? world.getHeight() - 1 - trooper.getY() : trooper.getY();
+//      answer[x][y] = true;
+//    }
+//
+//    return answer;
+//  }
+
+  public boolean canTrooperReachCell(TrooperModel trooper, int x, int y) {
+    return battleMap.canTrooperReachCell(trooper, x, y);
   }
 
   public BattleMap getBattleMap() {
@@ -64,9 +96,9 @@ public final class Environment implements Cloneable {
     return battleMap.getEnemies();
   }
 
-  public int getCellNotVisitTime(int x, int y) {
-    Cell cell = battleMap.getCell(x, y);
-    return currentTime - cell.getTimeOfLastVisit();
+  public int getCellNotVisitTime(int x, int y, int stance) {
+    Cell cell = battleMap.getCell(x, y, stance);
+    return currentTime - cell.getTimeLastSeen();
   }
 
   public boolean enemyIsVisible(TrooperModel self, TrooperModel enemyTrooper) {
@@ -76,40 +108,53 @@ public final class Environment implements Cloneable {
 
   public Environment clone() {
     World worldClone = Utils.copyOfTheWorld(world);
-    return new Environment(battleMap, worldClone, game, pathFinder, currentTime);
-  }
-
-  public void visitCell(int x, int y) {
-    battleMap.visitCell(x, y, currentTime);
+    return new Environment(currentTrooper, battleMap, battleState, worldClone, game, router, pathFinder, currentTime);
   }
 
   public CellChecker getCellChecker() {
     return cellChecker;
   }
 
-  public boolean canTrooperReachCell(TrooperModel trooper, int x, int y) {
-    int ap = trooper.getActionPoints();
-    int maxMoves = ap / game.getStandingMoveCost();
-    return battleMap.getDistance(trooper.getX(), trooper.getY(), x, y) <= maxMoves;
-  }
-
   public void putEnemy(TrooperModel enemy) {
+    logger.fine("adding enemy " + enemy);
     battleMap.putEnemy(enemy);
   }
 
   boolean[][] getReachableCells(TrooperModel trooper) {
-    World world = getWorld();
-    boolean[][] answer = new boolean[world.getWidth()][world.getHeight()];
-    for (int i = 0; i < world.getWidth(); ++i)
-      for (int j = 0; j < world.getHeight(); ++j)
-        if (cellChecker.cellIsFree(i, j) && canTrooperReachCell(trooper, i, j))
-          answer[i][j] = true;
-
-    return answer;
+    return battleMap.getReachableCells(trooper);
   }
 
   public Team getMyTeam() {
     return myTeam;
+  }
+
+  public int getCurrentTime() {
+    return currentTime;
+  }
+
+  public ArrayList<TrooperModel> getActualEnemies() {
+    ArrayList<TrooperModel> result = new ArrayList<>();
+    for (TrooperModel enemy : getEnemies()) {
+      if (battleMap.getCell(enemy.getX(), enemy.getY(), enemy.getStance().ordinal()).isActual(currentTime)) {
+        result.add(enemy);
+        logger.fine("Enemy is actual " + enemy);
+      }
+      else
+        logger.fine("Enemy is not actual " + enemy);
+    }
+    return result;
+  }
+
+  public Router getRouter() {
+    return router;
+  }
+
+  public TrooperModel getCurrentTrooper() {
+    return currentTrooper;
+  }
+
+  public BattleState getBattleState() {
+    return battleState;
   }
 }
 

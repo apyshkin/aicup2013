@@ -8,7 +8,7 @@ import model.Move;
  * Time: 6:40 AM
  * To change this template use File | Settings | File Templates.
  */
-public class EatFieldRationAction extends Action {
+public class EatFieldRationAction extends AbstractAction {
   public EatFieldRationAction(Environment environment) {
     super(ActionType.EAT_FIELD_RATION, new EatFieldRationActionChecker(environment), environment);
   }

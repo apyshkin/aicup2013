@@ -24,11 +24,10 @@ public class ClosenessToLeaderPriority implements IPriority {
     if (leader == trooper)
       distanceToLeader = 0;
     else {
-      BattleMap battleMap = environment.getBattleMap();
+      final BattleMap battleMap = environment.getBattleMap();
       distanceToLeader = battleMap.getDistance(x, y, leader.getX(), leader.getY());
     }
 
-    int points = distanceToLeader;
-    return points;
+    return distanceToLeader;
   }
 }

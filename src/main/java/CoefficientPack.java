@@ -11,8 +11,9 @@ public class CoefficientPack {
   private final int kClosenessToHealer;
   private final int kClosenessToLeader;
   private final int kAttack;
-  private int kExposure;
-  private int kDefense;
+  private final int kExposure;
+  private final int kDefense;
+  private final int kInvisibility;
 
   public CoefficientPack(int kPatrol,
                          int kTeamDensity,
@@ -20,7 +21,8 @@ public class CoefficientPack {
                          int kClosenessToLeader,
                          int kAttack,
                          int kDefense,
-                         int kExposure) {
+                         int kExposure,
+                         int kInvisibility) {
     this.kPatrol = kPatrol;
     this.kTeamDensity = kTeamDensity;
     this.kClosenessToHealer = kClosenessToHealer;
@@ -28,6 +30,7 @@ public class CoefficientPack {
     this.kAttack = kAttack;
     this.kDefense = kDefense;
     this.kExposure = kExposure;
+    this.kInvisibility = kInvisibility;
   }
 
   public int getkPatrol() {
@@ -56,5 +59,9 @@ public class CoefficientPack {
 
   public int getkDefense() {
     return kDefense;
+  }
+
+  public int getkInvisibility() {
+    return kInvisibility;
   }
 }

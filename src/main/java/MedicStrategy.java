@@ -1,5 +1,3 @@
-import model.Move;
-
 import java.util.logging.Logger;
 
 /**
@@ -11,11 +9,11 @@ import java.util.logging.Logger;
  */
 class MedicStrategy extends TrooperStrategyAdapter {
   private final static Logger logger = Logger.getLogger(MedicStrategy.class.getName());
-  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(1, 2, -4, -8, 1, -1, -1);
-  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(7, 4, -6, -8, 0, 0, -1);
+  private static final CoefficientPack ATTACK_COEFFICIENTS = new CoefficientPack(1, 4, -8, -8, 1, -1, 0, -100);
+  private static final CoefficientPack PATROL_COEFFICIENTS = new CoefficientPack(5, 3, -5, -9, 0, 0, 0, 0);
 
-  public MedicStrategy(Environment environment, TrooperModel self, Move move) {
-    super(environment, self, move);
+  public MedicStrategy(Environment environment, TrooperModel trooper) {
+    super(environment, trooper);
   }
 
   @Override

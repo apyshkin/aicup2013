@@ -7,7 +7,7 @@ import model.*;
  * Time: 6:29 PM
  * To change this template use File | Settings | File Templates.
  */
-public class HealAction extends Action {
+public class HealAction extends AbstractAction {
 
   public HealAction(Environment env) {
     super(ActionType.HEAL, new HealActionChecker(env), env);
@@ -23,8 +23,10 @@ public class HealAction extends Action {
     int newHitPoints = oldHitPoints + addingHitPoints;
     patient.setHitpoints(newHitPoints);
     int points = Math.min(newHitPoints, patient.getMaximalHitpoints()) - oldHitPoints;
+    if (patient.getHitpoints() < patient.getMaximalHitpoints() / 2)
+      points = points << 1;
 
-    return points * (4 + oldHitPoints / (oldHitPoints + 10));
+    return points * (3 + 100 / (oldHitPoints + 10));
   }
 
   private int getAdditionalHitPoints(TrooperModel trooper, TrooperModel patient) {

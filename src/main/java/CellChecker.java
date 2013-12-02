@@ -41,6 +41,6 @@ public class CellChecker {
   }
 
   public boolean cellIsWithinRange(int x1, int y1, int x2, int y2, double range) {
-    return UnitModel.getDistance(x1, y1, x2, y2) <= range;
+    return UnitModel.getDistance(x1, y1, x2, y2) < range + 0.001;
   }
 }

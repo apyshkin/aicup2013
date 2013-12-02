@@ -13,8 +13,14 @@ public final class MyStrategy implements Strategy {
     new Logging(LOGGING_LEVEL);
   }
 
+  static double totalTime = 0;
+  static int moveCount = 0;
   @Override
   public void move(Trooper self, World world, Game game, Move move) {
+    double millis = System.currentTimeMillis();
+
     curStrategy.move(self, world, game, move);
+    totalTime += System.currentTimeMillis() - millis;
+    System.out.println("time for move #" + ++moveCount + " " + (System.currentTimeMillis() - millis) + " : total " + totalTime);
   }
 }

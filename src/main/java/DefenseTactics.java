@@ -10,7 +10,7 @@ public class DefenseTactics implements ITactics {
   }
 
   @Override
-  public void setAction(ITrooperStrategy trooper) {
-    //To change body of implemented methods use File | Settings | File Templates.
+  public Pair<AbstractAction, IActionParameters> findBestAction(ITrooperStrategy trooperStrategy) {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
   }
 }

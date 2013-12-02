@@ -52,7 +52,7 @@ public class ThrowGrenadeActionChecker extends ActionChecker {
     if (troopers.size() == 1) {
       int trooperX = troopers.get(0).getX();
       int trooperY = troopers.get(0).getY();
-      if (x != trooperX && y != trooperY)
+      if (x != trooperX || y != trooperY)
         return false;
     }
 

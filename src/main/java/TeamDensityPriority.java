@@ -21,12 +21,12 @@ public class TeamDensityPriority implements IPriority {
     int maxDistance = countMaxDistance(x, y);
 
     int points;
-    if (maxDistance >= 7)
-      points = 15 - maxDistance;
-    else if (maxDistance >= 4)
-      points = 25 - maxDistance;
+    if (maxDistance >= 10)
+      points = 10 - 2 * maxDistance;
+    else if (maxDistance >= 3)
+      points = 20 - maxDistance;
     else
-      points = 14 + maxDistance;
+      points = 12 + maxDistance;
     return points;
   }
 
@@ -36,7 +36,7 @@ public class TeamDensityPriority implements IPriority {
     int maxDistance = 0;
     for (TrooperModel myTrooper : myTroopers)
       if (myTrooper != trooper)
-        maxDistance = Math.max(maxDistance, battleMap.getDistance(myTrooper.getX(), myTrooper.getY(), x, y));
+        maxDistance = Math.max(maxDistance,  battleMap.getDistance(myTrooper.getX(), myTrooper.getY(), x, y));
 
     return maxDistance;
   }

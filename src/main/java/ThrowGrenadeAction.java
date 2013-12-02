@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * Time: 5:17 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ThrowGrenadeAction extends Action {
+public class ThrowGrenadeAction extends AbstractAction {
   public ThrowGrenadeAction(Environment environment) {
     super(ActionType.THROW_GRENADE, new ThrowGrenadeActionChecker(environment), environment);
   }
@@ -52,7 +52,7 @@ public class ThrowGrenadeAction extends Action {
     }
     trooper.throwGrenade();
 
-    return points;
+    return 2 * points;
   }
 
   @Override

@@ -24,24 +24,27 @@ public class PriorityCalculator {
 
   public CellPriorities getPriorities() {
     World world = environment.getWorld();
+    double millis = System.currentTimeMillis();
     int[][][] priorityWeights = new int[world.getWidth()][world.getHeight()][3];
     boolean[][] suitableCells = getSuitableCells(trooper);
 
+    trooperMemorizer.memorize();
     for (int i = 0; i < world.getWidth(); ++i)
       for (int j = 0; j < world.getHeight(); ++j)
         if (suitableCells[i][j]) {
           for (int stance = 0; stance < 3; ++stance) {
             int cellWeight = 0;
             for (PriorityWeight weightCounter : priorityWeightList) {
-              trooperMemorizer.memorize();
               trooper.move(i, j, Utils.getStance(stance));
               cellWeight += weightCounter.countCellWeight(i, j, stance);
-              trooperMemorizer.reset();
             }
 
             priorityWeights[i][j][stance] = cellWeight;
           }
         }
+    trooperMemorizer.reset();
+
+    System.out.println("time for priorities " + (System.currentTimeMillis() - millis));
 
 //    printAll(suitableCells);
 //    System.out.println("SUM");
@@ -52,16 +55,21 @@ public class PriorityCalculator {
   private void printAll(boolean[][] suitableCells) {
     int[][] weights = new int[environment.getWorld().getWidth()][environment.getWorld().getHeight()];
     for (PriorityWeight weightCounter : priorityWeightList) {
-      for (int i = 0; i < environment.getWorld().getWidth(); ++i)
-        for (int j = 0; j < environment.getWorld().getHeight(); ++j)
-          if (suitableCells[i][j]) {
-            trooperMemorizer.memorize();
-            trooper.move(i, j, Utils.getStance(2));
-            weights[i][j] = weightCounter.countCellWeight(i, j, 2);
-            trooperMemorizer.reset();
-          }
-      System.out.println("PRIORITIES " + weightCounter);
-      Utils.printPriorities(environment.getWorld(), weights);
+      int stance = 2;
+      if (weightCounter.toString().contains("Defense") || weightCounter.toString().contains("Attack"))
+        stance = 0;
+      for (; stance < 3; ++stance) {
+        for (int i = 0; i < environment.getWorld().getWidth(); ++i)
+          for (int j = 0; j < environment.getWorld().getHeight(); ++j)
+            if (suitableCells[i][j]) {
+              trooperMemorizer.memorize();
+              trooper.move(i, j, Utils.getStance(stance));
+              weights[i][j] = weightCounter.countCellWeight(i, j, stance);
+              trooperMemorizer.reset();
+            }
+        System.out.println("PRIORITIES " + weightCounter);
+        Utils.printPriorities(environment.getWorld(), weights);
+      }
     }
   }
 

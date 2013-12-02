@@ -1,5 +1,3 @@
-import model.World;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -8,15 +6,23 @@ import model.World;
  * To change this template use File | Settings | File Templates.
  */
 public class AttackTactics implements ITactics {
-  private final Environment environment;
+  private ActionSequence actionSequence;
 
-  public AttackTactics(Environment environment) {
-    this.environment = environment;
+  public AttackTactics() {
+    actionSequence = null;
   }
 
   @Override
-  public void setAction(ITrooperStrategy trooper) {
-    trooper.setActionUnderTactics(this);
+  public Pair<AbstractAction, IActionParameters> findBestAction(ITrooperStrategy trooperStrategy) {
+    actionSequence = initActionSequence(trooperStrategy);
+    return actionSequence.next();
+  }
+
+  private ActionSequence initActionSequence(ITrooperStrategy trooperStrategy) {
+    if (actionSequence == null) {
+      actionSequence = trooperStrategy.findOptimalActions(this);
+    }
+    return actionSequence;
   }
 }
 

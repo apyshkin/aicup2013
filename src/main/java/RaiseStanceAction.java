@@ -8,7 +8,7 @@ import model.Move;
  * Time: 4:59 AM
  * To change this template use File | Settings | File Templates.
  */
-public class RaiseStanceAction extends Action {
+public class RaiseStanceAction extends AbstractAction {
   public RaiseStanceAction(Environment env) {
     super(ActionType.RAISE_STANCE, new RaiseStanceActionChecker(env), env);
   }

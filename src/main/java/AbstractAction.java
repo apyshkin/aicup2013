@@ -8,12 +8,12 @@ import model.Move;
  * Time: 4:52 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class Action {
+public abstract class AbstractAction {
   protected final Environment environment;
   private final ActionChecker actionChecker;
   private final ActionType actionType;
 
-  protected Action(ActionType actionType, ActionChecker actionChecker, Environment environment) {
+  protected AbstractAction(ActionType actionType, ActionChecker actionChecker, Environment environment) {
     this.actionType = actionType;
     this.actionChecker = actionChecker;
     this.environment = environment;

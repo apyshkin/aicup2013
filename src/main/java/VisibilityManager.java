@@ -30,17 +30,9 @@ public class VisibilityManager {
         if (cellChecker.cellIsFree(i, j))
           for (int x = 0; x < n; ++x)
             for (int y = 0; y < m; ++y)
-              if (cellChecker.cellIsFree(x, y)) {
-//                visibilityFrom[i][j][x][y][0] = world.isVisible(7, i, j, TrooperStance.STANDING,
-//                        x, y, TrooperStance.PRONE) ? (byte) 1 : (byte) 0;
-//                visibilityFrom[i][j][x][y][1] = world.isVisible(7, i, j, TrooperStance.STANDING,
-//                        x, y, TrooperStance.KNEELING) ? (byte) 1 : (byte) 0;
-//                visibilityFrom[i][j][x][y][2] = world.isVisible(7, i, j, TrooperStance.STANDING,
-//                        x, y, TrooperStance.STANDING) ? (byte) 1 : (byte) 0;
-                exposure[x][y][0] += visibilityFrom[i][j][x][y][0];
-                exposure[x][y][1] += visibilityFrom[i][j][x][y][1];
-                exposure[x][y][2] += visibilityFrom[i][j][x][y][2];
-              }
+              if (cellChecker.cellIsFree(x, y))
+                for (int stance = 0; stance < 3; ++stance)
+                  exposure[x][y][stance] += isVisibleFrom(i, j, x, y, Utils.getStance(stance)) ? (byte) 1 : (byte) 0;
   }
 
   public int getExposure(TrooperModel trooper, int x, int y) {
@@ -52,19 +44,38 @@ public class VisibilityManager {
   }
 
   public boolean isVisibleFrom(int x, int y, TrooperModel trooper) {
-    int n = world.getWidth();
-    int m = world.getHeight();
     int x1 = trooper.getX();
     int y1 = trooper.getY();
-    if (x >= n >> 1) {
-      x = n - 1 - x;
-      x1 = n - 1 - x1;
-    }
-    if (y >= m >> 1) {
-      y = m - 1 - y;
-      y1 = m - 1 - y1;
-    }
-//    return visibilityFrom[x][y][x1][y1][trooper.getStance().ordinal()] == 1;
-    return world.isVisible(7, x, y, TrooperStance.STANDING, x1, y1, trooper.getStance());
+    return isVisibleFrom(x, y, x1, y1, trooper.getStance());
   }
+
+  private boolean isVisibleFrom(int x, int y, int x1, int y1, TrooperStance stance) {
+    return isRangeVisible(8, x, y, TrooperStance.STANDING, x1, y1, stance);
+  }
+
+  public boolean isVisibleBy(TrooperModel trooper, int x, int y) {
+    int x1 = trooper.getX();
+    int y1 = trooper.getY();
+    return isRangeVisible(trooper.getVisionRange(), x1, y1, trooper.getStance(), x, y, TrooperStance.STANDING);
+  }
+
+  public boolean isVisible(TrooperModel trooper, int x, int y, TrooperStance stance) {
+    return isRangeVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(),
+            x, y, stance);
+  }
+
+  public boolean isVisible(TrooperModel trooper, TrooperModel anotherTrooper) {
+    return isRangeVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(),
+            anotherTrooper.getX(), anotherTrooper.getY(), anotherTrooper.getStance());
+  }
+
+  public boolean isAbleToShoot(TrooperModel trooper, TrooperModel anotherTrooper) {
+    return isRangeVisible(trooper.getShootingRange(), trooper.getX(), trooper.getY(), trooper.getStance(),
+            anotherTrooper.getX(), anotherTrooper.getY(), anotherTrooper.getStance());
+  }
+
+  public boolean isRangeVisible(double range, int x, int y, TrooperStance stance, int x1, int y1, TrooperStance stance1) {
+    return world.isVisible(range, x, y, stance, x1, y1, stance1);
+  }
+
 }

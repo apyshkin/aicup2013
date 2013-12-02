@@ -65,4 +65,16 @@ public class Team {
   public int count() {
     return myTroopers.size();
   }
+
+  public TrooperModel getMostHurt() {
+    int minHP = leader.getHitpoints();
+    TrooperModel answer = leader;
+    for (TrooperModel trooper : myTroopers) {
+      if (minHP > trooper.getHitpoints()) {
+        minHP = trooper.getHitpoints();
+        answer = trooper;
+      }
+    }
+    return answer;
+  }
 }

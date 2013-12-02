@@ -16,7 +16,17 @@ public class HealActionParameters extends DestinationActionParameters {
 
   @Override
   public String toString() {
-    return "healing " + patient + " at " + getX() + " " + getY();
+    return "healing " + patient + " at " + getX() + " " + getY() + " " + patient.getX() + " " + patient.getY();
+  }
+
+  @Override
+  public int getX() {
+    return patient.getX();
+  }
+
+  @Override
+  public int getY() {
+    return patient.getY();
   }
 
   public TrooperModel getPatient() {

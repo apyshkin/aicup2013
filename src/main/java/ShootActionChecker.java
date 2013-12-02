@@ -1,5 +1,3 @@
-import model.Trooper;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -13,17 +11,23 @@ public class ShootActionChecker extends ActionChecker {
   }
 
   @Override
-  public boolean checkActionValidity(IActionParameters params, TrooperModel trooper) {
+  public boolean checkActionValidity(IActionParameters params, TrooperModel shooter) {
     ShootActionParameters shootParams = (ShootActionParameters) params;
 
-    if (countActionCost(trooper) > trooper.getActionPoints())
+    if (countActionCost(shooter) > shooter.getActionPoints())
       return false;
-    if (!canShootAtCell(trooper, shootParams.getEnemyTrooper()))
+    if (!enemyIsSurelyThere(shootParams.getEnemyTrooper()))
+      return false;
+    if (!canShootAtCell(shooter, shootParams.getEnemyTrooper()))
       return false;
     if (!enemyIsAlive(shootParams.getEnemyTrooper()))
       return false;
 
     return true;
+  }
+
+  private boolean enemyIsSurelyThere(TrooperModel enemy) {
+    return environment.getBattleMap().getCell(enemy.getX(), enemy.getY(), enemy.getStance().ordinal()).isActual(environment.getCurrentTime());
   }
 
   private boolean enemyIsAlive(TrooperModel enemy) {

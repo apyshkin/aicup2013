@@ -8,7 +8,7 @@ public class MedicActionsGenerator extends TrooperActionsGenerator {
 
     for (TrooperModel patient : environment.getMyTroopers()) {
       HealActionParameters healActionParams = new HealActionParameters(patient);
-      actionsList.add(new Pair<Action, IActionParameters>(new HealAction(environment), healActionParams));
+      actionsList.add(new Pair<AbstractAction, IActionParameters>(new HealAction(environment), healActionParams));
     }
   }
 
