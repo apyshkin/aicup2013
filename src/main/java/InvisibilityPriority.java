@@ -30,7 +30,7 @@ public class InvisibilityPriority implements IPriority {
           for (int s = 0; s < 3; ++s) {
             trooper.move(i, j, Utils.getStance(s));
             for (TrooperModel enemy : enemies) {
-              if (battleMap.visibilityManager.isVisible(enemy, trooper))
+              if (battleMap.isVisible(enemy, trooper))
                 ++visibilities[i][j][s];
             }
           }

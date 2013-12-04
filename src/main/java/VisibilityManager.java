@@ -11,7 +11,6 @@ import model.World;
 public class VisibilityManager {
   private World world;
   private CellChecker cellChecker;
-  private byte[][][][][] visibilityFrom; // a player from (i, j) in a standing stance can see a player in (x, y) in a stance z
   private int[][][] exposure;
 
   public VisibilityManager(World world, CellChecker cellChecker) {
@@ -23,7 +22,6 @@ public class VisibilityManager {
   private void countVisibilities() {
     int n = world.getWidth();
     int m = world.getHeight();
-    visibilityFrom = new byte[n][m][n][m][3];
     exposure = new int[n][m][3];
     for (int i = 0; i < n >> 1; ++i)
       for (int j = 0; j < m >> 1; ++j)
@@ -32,7 +30,7 @@ public class VisibilityManager {
             for (int y = 0; y < m; ++y)
               if (cellChecker.cellIsFree(x, y))
                 for (int stance = 0; stance < 3; ++stance)
-                  exposure[x][y][stance] += isVisibleFrom(i, j, x, y, Utils.getStance(stance)) ? (byte) 1 : (byte) 0;
+                  exposure[x][y][stance] += isVisibleFrom(i, j, x, y, Utils.getStance(stance)) ? 1 : 0;
   }
 
   public int getExposure(TrooperModel trooper, int x, int y) {

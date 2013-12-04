@@ -12,10 +12,12 @@ import java.util.logging.Logger;
  */
 public class BattleMap {
   private final static Logger logger = Logger.getLogger(BattleMap.class.getName());
-  final VisibilityManager visibilityManager;
-  private final int width;
-  private final int height;
+  private VisibilityManager visibilityManager;
+  private int width;
+  private int height;
+  private final BattleState battleState;
   private final Game game;
+  private static MapCellFactory mapCellFactory;
   private CellChecker cellChecker;
   private PathFinder pathFinder;
   private DistanceCounter distanceCounter;
@@ -23,15 +25,15 @@ public class BattleMap {
   private ArrayList<TrooperModel> visibleTroopers;
   private ArrayList<TrooperModel> enemies;
 
-  public BattleMap(World world, Game game, CellChecker cellChecker) {
+  public BattleMap(Game game, BattleState battleState, CellChecker cellChecker) {
     this.game = game;
-    width = world.getWidth();
-    height = world.getHeight();
+    this.battleState = battleState;
     this.cellChecker = cellChecker;
-    this.pathFinder = new PathFinder(world, cellChecker);
-    this.distanceCounter = new DistanceCounter(world, cellChecker, pathFinder);
-    this.visibilityManager = new VisibilityManager(world, cellChecker);
-    init(world);
+  }
+
+  public static MapCellFactory getMapCellFactory() {
+    assert mapCellFactory != null;
+    return mapCellFactory;
   }
 
   public CellChecker getCellChecker() {
@@ -42,7 +44,13 @@ public class BattleMap {
     return distanceCounter;
   }
 
-  private void init(World world) {
+  public void init(World world) {
+    width = world.getWidth();
+    height = world.getHeight();
+    this.pathFinder = new PathFinder(world, cellChecker);
+    this.distanceCounter = new DistanceCounter(world, cellChecker, pathFinder);
+    this.visibilityManager = new VisibilityManager(world, cellChecker);
+    this.mapCellFactory = new MapCellFactory(width, height);
     initCellArray(world);
     visibleTroopers = new ArrayList<>();
     enemies = new ArrayList<>();
@@ -82,7 +90,7 @@ public class BattleMap {
   public boolean canTrooperReachCell(TrooperModel trooper, int x, int y) {
     int ap = trooper.getActionPoints() + (trooper.isHoldingFieldRation() ? 3 : 0);
     int stance = trooper.getStance().ordinal();
-    int maxMoves = (ap - 2 * (2 - stance)) / 2;
+    int maxMoves = trooper.countMaxMoves();
     return getDistance(trooper.getX(), trooper.getY(), x, y) <= maxMoves;
   }
 
@@ -134,6 +142,11 @@ public class BattleMap {
     ArrayList<TrooperModel> trooperToRemove = new ArrayList<>();
     ArrayList<TrooperModel> myTroopers = getMyTroopers();
     for (TrooperModel oldTrooper : visibleTroopers) {
+      if (oldTrooper.getHitpoints() <= 0) {
+        battleState.setTrooperDead(oldTrooper);
+        trooperToRemove.add(oldTrooper);
+        continue;
+      }
       boolean canSeeItIndeed = false;
       boolean mustBeVisibleNow = checkVisibility(myTroopers, oldTrooper);
       if (mustBeVisibleNow) {
@@ -193,10 +206,10 @@ public class BattleMap {
     for (Bonus bonus : world.getBonuses()) {
       int x = bonus.getX();
       int y = bonus.getY();
-      if (cells[x][y][0].hasBonus())
-        logger.fine("I've seen that bonus!");
-      else
-        logger.fine("New bonus at " + x + "," + y + " -- cool!");
+//      if (cells[x][y][0].hasBonus())
+//        logger.fine("I've seen that bonus!");
+//      else
+//        logger.fine("New bonus at " + x + "," + y + " -- cool!");
       cells[x][y][0].setBonus(bonus);
     }
   }
@@ -240,6 +253,7 @@ public class BattleMap {
     assert (!enemy.isTeammate());
     visibleTroopers.add(enemy);
     enemies.add(enemy);
+    cells[enemy.getX()][enemy.getY()][2].invalidate();
   }
 
   public PathFinder getPathFinder() {
@@ -262,55 +276,21 @@ public class BattleMap {
     return cells[tx][ty][0].getBonus();
   }
 
+
+  public boolean ableToThrowGrenade(TrooperModel trooper, int x, int y) {
+    return trooper.isHoldingGrenade() && trooper.getDistanceTo(x, y) < game.getGrenadeThrowRange();
+  }
+
   public boolean ableToThrowGrenade(TrooperModel trooper, TrooperModel anotherTrooper) {
-    return trooper.isHoldingGrenade() && trooper.getDistanceTo(anotherTrooper.getX(), anotherTrooper.getY()) < game.getGrenadeThrowRange();
+    return ableToThrowGrenade(trooper, anotherTrooper.getX(), anotherTrooper.getY());
   }
 
   public int getActuality(TrooperModel trooper, int currentTime) {
     return getCell(trooper.getX(), trooper.getY(), trooper.getStance().ordinal()).getActuality(currentTime);
   }
-}
 
-class Cell {
-  private CellType cellType;
-  private Bonus bonus = null;
-  private int timeLastSeen;
-
-  public Cell(CellType cellType, int timeLastSeen) {
-    this.cellType = cellType;
-    this.timeLastSeen = timeLastSeen;
-  }
-
-  int getTimeLastSeen() {
-    return timeLastSeen;
-  }
-
-  public boolean hasBonus() {
-    return bonus != null;
-  }
-
-  public Bonus getBonus() {
-    return bonus;
-  }
-
-  void setBonus(Bonus bonus) {
-    this.bonus = bonus;
-  }
-
-  public void update(int time) {
-    assert time >= timeLastSeen;
-    timeLastSeen = time;
-  }
-
-  public boolean isActual(int currentTime) {
-    return currentTime <= timeLastSeen + 1;
-  }
-
-  public CellType getType() {
-    return cellType;
-  }
-
-  public int getActuality(int currentTime) {
-    return (currentTime - timeLastSeen + 1);
+  public boolean isVisible(TrooperModel enemy, TrooperModel trooper) {
+    return visibilityManager.isVisible(enemy, trooper);
   }
 }
+

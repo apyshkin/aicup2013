@@ -45,9 +45,6 @@ public class ClosenessToHealerPriority implements IPriority {
 
       int ans = 0;
       TrooperModel healer = environment.getMyTeam().getMyTrooper(TrooperType.FIELD_MEDIC);
-//      TrooperModel patient = environment.getMyTeam().getMostHurt();
-//      if (healer == patient)
-//        return 0;
 
       {
         if (trooper != healer)
@@ -57,9 +54,9 @@ public class ClosenessToHealerPriority implements IPriority {
 
         for (TrooperModel trooper : environment.getMyTroopers()) {
           if (distances[trooper.getX()][trooper.getY()] > 10)
-            ans += 6 * (10 + getMaximalHitpoints(trooper) - trooper.getHitpoints()) * distances[trooper.getX()][trooper.getY()] / 10;
+            ans += 8 * (10 + getMaximalHitpoints(trooper) - trooper.getHitpoints()) * distances[trooper.getX()][trooper.getY()] / 10;
           else
-            ans += 2 * (10 + getMaximalHitpoints(trooper) - trooper.getHitpoints()) * distances[trooper.getX()][trooper.getY()] / 10;
+            ans += 2 * (5 + getMaximalHitpoints(trooper) - trooper.getHitpoints()) * distances[trooper.getX()][trooper.getY()] / 10;
         }
 
         if (trooper != healer)

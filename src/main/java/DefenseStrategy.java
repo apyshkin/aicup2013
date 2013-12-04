@@ -20,25 +20,34 @@ public final class DefenseStrategy implements Strategy {
   private static Trooper lastTrooper = null;
   private static Analyser analyser;
   private final TimeCounter timeCounter = new TimeCounter();
+  private static int K = 0;
+  private static int L = 0;
+  private static final int N = 5;
 
   @Override
   public void move(Trooper trooper, World world, Game game, Move move) {
-    initBattleMap(world, game);
+    timeCounter.reset();
     initBattleState(world);
+    initBattleMap(world, game);
+    timeCounter.status("batlemap & state");
     logger.info("");
     logger.info("I AM " + new TrooperModel(trooper) + " and I want to move!" + "ITERATION " + world.getMoveIndex());
     try {
-      timeCounter.reset();
       initRouter();
       Environment environment = createEnvironment(trooper, world, game, router, world.getMoveIndex());
       updateHistory(environment);
       updateAnalyzer(trooper, environment);
       currentMoveIndex = world.getMoveIndex();
+      timeCounter.status("initialization");
 
       ITactics chosenTactics = analyser.chooseTactics();
+      timeCounter.status("analysis");
 
       TrooperModel myTrooper = environment.getMyTeam().getMyTrooper(trooper.getType());
       Pair<AbstractAction, IActionParameters> actionPair = findAction(environment.clone(), myTrooper, chosenTactics); // clone is important
+
+      timeCounter.status("findAction");
+
       execute(move, myTrooper, actionPair);
 
     } catch (Exception e) {
@@ -49,9 +58,9 @@ public final class DefenseStrategy implements Strategy {
   private void initBattleState(World world) {
     if (battleState == null) {
       long myId = 0;
-      ArrayList<TrooperModel> visTroopers = battleMap.getVisibleTroopers();
+      Trooper[] troopers = world.getTroopers();
       int teamSize = 0;
-      for (TrooperModel trooper : visTroopers)
+      for (Trooper trooper : troopers)
         if (trooper.isTeammate()) {
           myId = trooper.getPlayerId();
           ++teamSize;
@@ -88,9 +97,23 @@ public final class DefenseStrategy implements Strategy {
   }
 
   private void initBattleMap(World world, Game game) {
-    if (battleMap == null)
-      battleMap = new BattleMap(world, game, new CellChecker(world));
+    if (battleMap == null) {
+      battleMap = new BattleMap(game, battleState, new CellChecker(world));
+      battleMap.init(world);
+    }
     battleMap.update(world);
+    if (world.getMoveIndex() % 2 == 0) {
+      if (L == N) {
+        ++K;
+        L = 0;
+      }
+      if (K == N) {
+        logger.info("ALL FILLED");
+        return;
+      }
+
+      battleMap.getDistanceCounter().fillGradually(K, L++, N);
+    }
   }
 
   private Pair<AbstractAction, IActionParameters> findAction(Environment environment, TrooperModel trooper, ITactics chosenTactics) throws InvalidTrooperTypeException {
@@ -105,9 +128,9 @@ public final class DefenseStrategy implements Strategy {
         case FIELD_MEDIC:
           return chosenTactics.findBestAction(new MedicStrategy(environment, trooper));
         case SNIPER:
-          return chosenTactics.findBestAction(new SoldierStrategy(environment, trooper));
+          return chosenTactics.findBestAction(new SniperStrategy(environment, trooper));
         case SCOUT:
-          return chosenTactics.findBestAction(new SoldierStrategy(environment, trooper));
+          return chosenTactics.findBestAction(new ScoutStrategy(environment, trooper));
         default:
           throw new InvalidTrooperTypeException();
       }

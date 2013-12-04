@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class AttackPriority implements IPriority {
 
-  private static final int MAX_RADIUS = 4;
+  private static final int MAX_RADIUS = 5;
   private final Environment environment;
   private final TrooperModel trooper;
   private final boolean[][] cellsOneCanShootFrom;
@@ -67,7 +67,7 @@ public class AttackPriority implements IPriority {
 
     trooperLocations[x][y] = true;
     int minPoints = Utils.INFINITY;
-    ArrayList<TrooperModel> enemies = environment.getEnemies();
+    ArrayList<TrooperModel> enemies = environment.getActualEnemies();
     for (TrooperModel enemy : enemies) {
       if (enemyIsShootableFrom(x, y, 2, enemy)) {
         int stanceFromWhichCanShoot = 0;
@@ -85,7 +85,7 @@ public class AttackPriority implements IPriority {
         minPoints = Math.min(minPoints, points);
       }
     }
-    minPoints += possibleGrenadeDamage[x][y] >> 1;
+    minPoints += possibleGrenadeDamage[x][y] / 2;
     trooperLocations[x][y] = false;
 
     if (minPoints < Utils.INFINITY)

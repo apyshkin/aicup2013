@@ -16,7 +16,7 @@ public class PriorityWeightsFactory {
     this.trooper = trooper;
   }
 
-  public ArrayList<PriorityWeight> createPriorityWeightsList(CoefficientPack coefficientPack) {
+  public ArrayList<PriorityWeight> createPriorityWeightsList(PriorityCoeffPack coefficientPack) {
     ArrayList<PriorityWeight> result = new ArrayList<>();
     result.add(new PriorityWeight(new PatrolPriority(environment, trooper), coefficientPack.getkPatrol()));
     result.add(new PriorityWeight(new TeamDensityPriority(environment, trooper), coefficientPack.getkTeamDensity()));
@@ -26,6 +26,7 @@ public class PriorityWeightsFactory {
     result.add(new PriorityWeight(new DefensePriority(environment, trooper), coefficientPack.getkDefense()));
     result.add(new PriorityWeight(new ExposurePriority(environment, trooper), coefficientPack.getkExposure()));
     result.add(new PriorityWeight(new InvisibilityPriority(environment, trooper), coefficientPack.getkInvisibility()));
+    result.add(new PriorityWeight(new AwarenessPriority(environment, trooper), coefficientPack.getkAwareness()));
     return result;
   }
 }

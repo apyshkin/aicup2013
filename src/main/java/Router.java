@@ -1,7 +1,8 @@
 import model.Bonus;
-import model.BonusType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Stack;
 
 public class Router implements IRouter {
   private static final int MAX_DIST_CHECKPOINT = 8;
@@ -10,10 +11,12 @@ public class Router implements IRouter {
   private MapCell firstCP;
   private int CPCount = 0;
   private MapCell[] checkPoints;
+  private static Stack<MapCell> stackCP;
   private MapCell currentCP;
   private boolean initialized = false;
 
   private final MapCell[] initCheckPoints() {
+    stackCP = new Stack<>();
     return new MapCell[] {firstCP, firstCP.reflectX(), center,
             firstCP.reflectXY(), firstCP.reflectY(), center};
   }
@@ -41,12 +44,17 @@ public class Router implements IRouter {
 
   @Override
   public void nextCheckPoint() {
-    ++CPCount;
-    CPCount = CPCount % checkPoints.length;
-    updateCurrentCheckPoint();
+    if (stackCP.isEmpty()) {
+      ++CPCount;
+      CPCount = CPCount % checkPoints.length;
+      updateCurrentCheckPoint();
+    }
+    else
+      currentCP = stackCP.pop();
   }
 
   private void updateCurrentCheckPoint() {
+    assert stackCP.isEmpty();
     currentCP = checkPoints[CPCount];
   }
 
@@ -87,11 +95,11 @@ public class Router implements IRouter {
           if (cell.hasBonus()) {
             Bonus bonus = cell.getBonus();
             switch (bonus.getType()) {
-              case FIELD_RATION: res += 2;
+              case FIELD_RATION: res += 3;
                 break;
-              case GRENADE: res += 2;
+              case GRENADE: res += 3;
                 break;
-              case MEDIKIT: res += 3;
+              case MEDIKIT: res += 4;
                 break;
               default:
                 break;
@@ -116,7 +124,7 @@ public class Router implements IRouter {
     for (int i = battleMap.getWidth() - 1; i >= 0; --i)
       for (int j = battleMap.getHeight() - 1; j >= 0; --j)
         if (battleMap.getCellChecker().cellIsFree(i, j) && getDistance(x, y, i, j) < minDist) {
-          answer = new MapCell(battleMap.getWidth(), battleMap.getHeight(), i, j);
+          answer = BattleMap.getMapCellFactory().createMapCell(i, j);
           minDist = getDistance(x, y, i, j);
         }
     assert answer != null;
@@ -132,25 +140,37 @@ public class Router implements IRouter {
             battleMap.getHeight() >> 1);
   }
 
+  public boolean checkPointWasPassed(MapCell checkPoint) {
+    if (!stackCP.contains(checkPoint))
+      return true;
+
+    assert (Arrays.asList(checkPoints).contains(checkPoint));
+    return currentCP != checkPoint;
+  }
 
   @Override
   public boolean checkPointWasReached() {
     final int checkPointX = currentCP.getX();
     final int checkPointY = currentCP.getY();
-    boolean oneHasReached = false;
     int maxDistance = 0;
+    int avgDistance = 0;
     for (TrooperModel trooper : getMyTroopers()) {
-      if (battleMap.getCellChecker().cellsAreTheSame(trooper.getX(), trooper.getY(), checkPointX, checkPointY))
-        oneHasReached = true;
-      maxDistance = Math.max(maxDistance, battleMap.getDistance(trooper.getX(), trooper.getY(), checkPointX, checkPointY));
+      final int distanceToCP = battleMap.getDistance(trooper.getX(), trooper.getY(), checkPointX, checkPointY);
+      avgDistance = distanceToCP;
+      maxDistance = Math.max(maxDistance, distanceToCP);
 //      System.out.println("cp " + checkPointX + " " + checkPointY + " : " + trooper);
     }
-    return oneHasReached && maxDistance < MAX_DIST_CHECKPOINT;
+    avgDistance /= getMyTroopers().size();
+    return avgDistance < MAX_DIST_CHECKPOINT >> 1 && maxDistance < MAX_DIST_CHECKPOINT;
   }
 
   @Override
   public void setCheckPoint(MapCell checkPoint) {
     currentCP = findClosestEmptyCell(checkPoint.getX(), checkPoint.getY());
+  }
+
+  public void addCheckPoint(MapCell newCheckPoint) {
+    stackCP.push(newCheckPoint);
   }
 }
 

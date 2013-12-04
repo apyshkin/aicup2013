@@ -30,10 +30,6 @@ public class BattleHistory {
     return history.get(index);
   }
 
-  public Environment getLast() {
-    return history.get(history.size() - 1);
-  }
-
   public int size() {
     return history.size();
   }

@@ -5,7 +5,9 @@
  * Time: 5:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface IPotential {
-  public void preCount(boolean[][] reachableCells);
+public interface IPathPotential {
+  public void preCount(boolean[][] reachableCells, int coeff);
   public int getPotential(int x, int y, int stance);
+
+  int countNewPathPoints(int currentPathPotential, int newPositionPotential);
 }

@@ -11,28 +11,28 @@ import java.util.logging.*;
  * To change this template use File | Settings | File Templates.
  */
 public class Logging {
-  private final static Logger logger = LogManager.getLogManager().getLogger("");
-  private static ConsoleHandler handler = null;
+//  private final static Logger logger = LogManager.getLogManager().getLogger("");
+//  private static ConsoleHandler handler = null;
 
   public static void init(Level level){
-    try {
-      for (Handler handler : logger.getHandlers())
-        logger.removeHandler(handler);
-      handler = new ConsoleHandler();
-      logger.addHandler(handler);
-      handler.setFormatter(new SimpleFormatter());
-      handler.setLevel(level);
-    } catch (SecurityException e) {
-      e.printStackTrace();
-    }
+//    try {
+//      for (Handler handler : logger.getHandlers())
+//        logger.removeHandler(handler);
+//      handler = new ConsoleHandler();
+//      logger.addHandler(handler);
+//      handler.setFormatter(new SimpleFormatter());
+//      handler.setLevel(level);
+//    } catch (SecurityException e) {
+//      e.printStackTrace();
+//    }
 
   }
 
   public Logging(Level level) {
-    init(level);
-    logger.setLevel(level);
-    for (Handler h : logger.getHandlers())
-      h.setLevel(level);
-    logger.log(Level.INFO, "Initializing Logger");
+//    init(level);
+//    logger.setLevel(level);
+//    for (Handler h : logger.getHandlers())
+//      h.setLevel(level);
+//    logger.log(Level.INFO, "Initializing Logger");
   }
 }

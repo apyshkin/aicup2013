@@ -49,4 +49,9 @@ public class BattleState {
   public long getMyId() {
     return myId;
   }
+
+  public void setTrooperDead(TrooperModel trooper) {
+    PlayerState state = getPlayerState(trooper.getPlayerId());
+    state.killTrooper(trooper);
+  }
 }

@@ -14,6 +14,7 @@ public class DistanceCounter {
   private CellChecker cellChecker;
   private PathFinder pathFinder;
   private int[][][][] distances;
+  private boolean[][] isCounted;
 
   public DistanceCounter(World world, CellChecker cellChecker, PathFinder pathFinder) {
     this.cellChecker = cellChecker;
@@ -26,8 +27,23 @@ public class DistanceCounter {
   private void init() {
     timeCounter.reset();
     distances = new int[width][height][width][height];
-    countDistances();
+    isCounted = new boolean[width][height];
+//    countDistances();
     timeCounter.status("path counting time ");
+  }
+
+  public void fillGradually(int k, int l, int n) {
+    assert k < n;
+    assert l < n;
+
+    for (int i = k * (width >> 1) / n; i < (k + 1) * (width >> 1) / n; ++i)
+      for (int j = l * (height >> 1) / n; j < (l + 1) * (height >> 1) / n; ++j)
+        if (cellChecker.cellIsFree(i, j)) {
+          assert !isCounted[i][j];
+          countPaths(i, j);
+          isCounted[i][j] = true;
+        }
+
   }
 
   public void countDistances() {
@@ -48,7 +64,12 @@ public class DistanceCounter {
       y1 = height - 1 - y1;
     }
     assert (cellChecker.cellIsFree(x, y) && cellChecker.cellIsFree(x1, y1));
-    return distances[x][y][x1][y1];
+    if (!isCounted[x][y] && !isCounted[x1][y1])
+      return Math.abs(x1 - x) + Math.abs(y1 - y);
+    else if (isCounted[x][y])
+      return distances[x][y][x1][y1];
+    else
+      return distances[x1][y1][x][y];
   }
 
   private void countPaths(int x, int y) {

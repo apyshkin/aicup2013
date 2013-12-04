@@ -46,9 +46,9 @@ public class PriorityCalculator {
 
     System.out.println("time for priorities " + (System.currentTimeMillis() - millis));
 
-//    printAll(suitableCells);
-//    System.out.println("SUM");
-//    Utils.printPriorities(world, priorityWeights, 2);
+    printAll(suitableCells);
+    System.out.println("SUM");
+    Utils.printPriorities(world, priorityWeights, 2);
     return new CellPriorities(environment, priorityWeights);
   }
 
@@ -75,13 +75,13 @@ public class PriorityCalculator {
 
   private boolean[][] getSuitableCells(TrooperModel trooper) {
     boolean[][] reachableCells = environment.getReachableCells(trooper);
-//    System.out.println("REACHABLE");
-//    Utils.printPriorities(environment.getWorld(), reachableCells);
+    System.out.println("REACHABLE");
+    Utils.printPriorities(environment.getWorld(), reachableCells);
     for (TrooperModel anotherTrooper : environment.getMyTroopers())
       if (trooper != anotherTrooper)
         reachableCells[anotherTrooper.getX()][anotherTrooper.getY()] = false;
-//    System.out.println("REACHABLE TROOPERS CONSIDERED");
-//    Utils.printPriorities(environment.getWorld(), reachableCells);
+    System.out.println("REACHABLE TROOPERS CONSIDERED");
+    Utils.printPriorities(environment.getWorld(), reachableCells);
 
     return reachableCells;
   }

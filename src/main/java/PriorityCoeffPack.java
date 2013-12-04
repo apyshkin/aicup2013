@@ -5,7 +5,7 @@
  * Time: 12:09 AM
  * To change this template use File | Settings | File Templates.
  */
-public class CoefficientPack {
+public class PriorityCoeffPack {
   private final int kPatrol;
   private final int kTeamDensity;
   private final int kClosenessToHealer;
@@ -14,15 +14,17 @@ public class CoefficientPack {
   private final int kExposure;
   private final int kDefense;
   private final int kInvisibility;
+  private final int kAwareness;
 
-  public CoefficientPack(int kPatrol,
-                         int kTeamDensity,
-                         int kClosenessToHealer,
-                         int kClosenessToLeader,
-                         int kAttack,
-                         int kDefense,
-                         int kExposure,
-                         int kInvisibility) {
+  public PriorityCoeffPack(int kPatrol,
+                           int kTeamDensity,
+                           int kClosenessToHealer,
+                           int kClosenessToLeader,
+                           int kAttack,
+                           int kDefense,
+                           int kExposure,
+                           int kInvisibility,
+                           int kAwareness) {
     this.kPatrol = kPatrol;
     this.kTeamDensity = kTeamDensity;
     this.kClosenessToHealer = kClosenessToHealer;
@@ -31,6 +33,7 @@ public class CoefficientPack {
     this.kDefense = kDefense;
     this.kExposure = kExposure;
     this.kInvisibility = kInvisibility;
+    this.kAwareness = kAwareness;
   }
 
   public int getkPatrol() {
@@ -63,5 +66,9 @@ public class CoefficientPack {
 
   public int getkInvisibility() {
     return kInvisibility;
+  }
+
+  public int getkAwareness() {
+    return kAwareness;
   }
 }

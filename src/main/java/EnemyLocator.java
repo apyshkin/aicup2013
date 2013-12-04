@@ -37,10 +37,10 @@ public class EnemyLocator {
         result.add(enemy);
       }
     }
-    if (!result.isEmpty())
-      logger.info("last seen enemy at " + enemies.get(result.get(0)));
-    else
-      logger.info("have not seen enemy at " + " all");
+//    if (!result.isEmpty())
+//      logger.info("last seen enemy at " + enemies.get(result.get(0)));
+//    else
+//      logger.info("have not seen enemy at " + " all");
 
     return result;
   }

@@ -31,6 +31,10 @@ public class PlayerState {
       playerDead = true;
   }
 
+  public boolean isTrooperDead(TrooperModel trooper) {
+    return deadTroopers.contains(trooper);
+  }
+
   public boolean isPlayerDead() {
     return (player.isStrategyCrashed() || playerDead);
   }

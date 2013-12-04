@@ -1,6 +1,4 @@
-import model.Player;
 import model.Trooper;
-import model.TrooperStance;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -19,6 +17,7 @@ public class Analyser {
   private AttackTactics attackTactics;
   private PatrolTactics patrolTactics;
   private ArrayList<IAnalysis> analysts;
+  int timeOfPatrolling = 0;
 
   public Analyser(Environment environment, BattleHistory battleHistory) {
     this.environment = environment;
@@ -27,21 +26,25 @@ public class Analyser {
   }
 
   private void init() {
-    analysts = new ArrayList<>();
-    analysts.add(new VisibleEnemyAnalysis(environment, battleHistory));
-    analysts.add(new IsUnderAttackAnalysis(environment, battleHistory));
-    analysts.add(new CannotFindEnemyAnalysis(environment, battleHistory));
+//    if (analysts == null) {
+      analysts = new ArrayList<>();
+      analysts.add(new VisibleEnemyAnalysis(environment));
+      analysts.add(new IsUnderAttackAnalysis(environment, battleHistory));
+      analysts.add(new CannotFindEnemyAnalysis(environment, timeOfPatrolling));
+//    }
   }
 
   public ITactics chooseTactics() {
-    checkConsistency();
+//    checkConsistency();
 
     for (IAnalysis analyst : analysts) {
       if (analyst.condition()) {
+        timeOfPatrolling = 0;
         analyst.doAction();
         return analyst.getTactics();
       }
     }
+    ++timeOfPatrolling;
     logger.info("No enemy, just patrolling");
     return getPatrolTactics();
   }

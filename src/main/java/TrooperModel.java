@@ -270,4 +270,10 @@ public class TrooperModel extends UnitModel implements Cloneable {
     holdingMedkit = trooper.isHoldingMedkit();
     holdingFieldRation = trooper.isHoldingFieldRation();
   }
+
+  public int countMaxMoves() {
+    int ap = getActionPoints();
+    int stance = getStance().ordinal();
+    return (ap - 2 * (2 - stance)) / 2;
+  }
 }

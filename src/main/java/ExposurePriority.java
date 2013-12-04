@@ -20,7 +20,6 @@ public class ExposurePriority implements IPriority {
 
   @Override
   public int getPriority(int x, int y, int stance) {
-    assert (trooper.getStance() == Utils.getStance(stance));
     return environment.getBattleMap().getExposure(trooper, x, y);
   }
 }

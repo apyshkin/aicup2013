@@ -1,5 +1,3 @@
-import java.util.logging.Logger;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -7,20 +5,20 @@ import java.util.logging.Logger;
  * Time: 12:25 AM
  * To change this template use File | Settings | File Templates.
  */
-class MedicStrategy extends TrooperStrategyAdapter {
-  private final static Logger logger = Logger.getLogger(MedicStrategy.class.getName());
-  private static final PriorityCoeffPack ATTACK_PRIORITIES = new PriorityCoeffPack(1, 3, -9, -18, 1, -1, -1, -150, 0);
-  private static final PriorityCoeffPack PATROL_PRIORITIES = new PriorityCoeffPack(5, 3, -5, -9, 0, 0, -1, 0, -10);
+class ScoutStrategy extends TrooperStrategyAdapter {
+  private static final PriorityCoeffPack ATTACK_PRIORITIES = new PriorityCoeffPack(0, 1, -6, -2, 0, -1, -3, -200, -5);
+  private static final PriorityCoeffPack PATROL_PRIORITIES = new PriorityCoeffPack(8, 0, 0, 0, 0, 0, -1, 0, -5);
   private static final PotentialCoeffPack ATTACK_POTENTIALS = new PotentialCoeffPack(1, 1);
   private static final PotentialCoeffPack PATROL_POTENTIALS = new PotentialCoeffPack(1, 1);
 
-  public MedicStrategy(Environment environment, TrooperModel trooper) {
+
+  protected ScoutStrategy(Environment environment, TrooperModel trooper) {
     super(environment, trooper);
   }
 
   @Override
   protected IActionsGenerator createActionsGenerator() {
-    return new MedicActionsGenerator(environment);
+    return new TrooperActionsGenerator(environment);
   }
 
   @Override
@@ -42,6 +40,4 @@ class MedicStrategy extends TrooperStrategyAdapter {
   protected PotentialCoeffPack getPatrolPotentialCoeff() {
     return PATROL_POTENTIALS;
   }
-
 }
-

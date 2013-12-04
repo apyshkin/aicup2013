@@ -38,25 +38,6 @@ public final class Environment implements Cloneable {
     currentTrooper = myTeam.getMyTrooper(trooper.getType());
   }
 
-//  private boolean[][] getCellsToCount(TrooperModel myTrooper) {
-//    boolean[][] answer = new boolean[world.getWidth()][world.getHeight()];
-//    for (int i = 0; i < world.getWidth(); ++i)
-//      for (int j = 0; j < world.getHeight(); ++j)
-//        if (cellChecker.cellIsFree(i, j) && canTrooperReachCell(myTrooper, i, j)) {
-//          int x = (i >= world.getWidth() >> 1) ? world.getWidth() - 1 - i : i;
-//          int y = (j >= world.getHeight() >> 1) ? world.getHeight() - 1 - j : j;
-//          answer[x][y] = true;
-//        }
-//
-//    for (TrooperModel trooper : getMyTroopers()) {
-//      int x = (trooper.getX() >= world.getWidth() >> 1) ? world.getWidth() - 1 - trooper.getX() : trooper.getX();
-//      int y = (trooper.getY() >= world.getHeight() >> 1) ? world.getHeight() - 1 - trooper.getY() : trooper.getY();
-//      answer[x][y] = true;
-//    }
-//
-//    return answer;
-//  }
-
   public boolean canTrooperReachCell(TrooperModel trooper, int x, int y) {
     return battleMap.canTrooperReachCell(trooper, x, y);
   }
@@ -116,7 +97,7 @@ public final class Environment implements Cloneable {
   }
 
   public void putEnemy(TrooperModel enemy) {
-    logger.fine("adding enemy " + enemy);
+//    logger.fine("adding enemy " + enemy);
     battleMap.putEnemy(enemy);
   }
 
@@ -137,10 +118,10 @@ public final class Environment implements Cloneable {
     for (TrooperModel enemy : getEnemies()) {
       if (battleMap.getCell(enemy.getX(), enemy.getY(), enemy.getStance().ordinal()).isActual(currentTime)) {
         result.add(enemy);
-        logger.fine("Enemy is actual " + enemy);
+//        logger.fine("Enemy is actual " + enemy);
       }
-      else
-        logger.fine("Enemy is not actual " + enemy);
+//      else
+//        logger.fine("Enemy is not actual " + enemy);
     }
     return result;
   }
@@ -156,5 +137,8 @@ public final class Environment implements Cloneable {
   public BattleState getBattleState() {
     return battleState;
   }
-}
 
+  public int getMoveIndex() {
+    return currentTime;
+  }
+}

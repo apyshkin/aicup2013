@@ -103,7 +103,7 @@ public class PatrolPriority implements IPriority {
     int distance = pathFinder.countDistanceToCellWithObstacles(leader.getX(), leader.getY(),
             checkPoint.getY(), checkPoint.getX(), obstacles, Utils.INFINITY);
     if (distance > distanceFromLeaderToCP) {
-      penalty = 30 - distanceFromLeaderToMe;
+      penalty = 20 - 2 * distanceFromLeaderToMe;
     }
     obstacles[x][y] = false;
     return penalty;

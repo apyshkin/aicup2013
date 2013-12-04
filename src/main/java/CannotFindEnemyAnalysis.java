@@ -11,27 +11,48 @@ import java.util.logging.Logger;
  * Time: 3:23 PM
  * To change this template use File | Settings | File Templates.
  */
+enum CallStatus {
+  DEFAULT,
+  WAITING_FOR_RESPONSE,
+  RESPONSE,
+  WALKING_TO_ENEMY
+}
 public class CannotFindEnemyAnalysis implements IAnalysis {
   private final static Logger logger = Logger.getLogger(CannotFindEnemyAnalysis.class.getName());
-  private static boolean waitingForEnemiesLocations;
-  private static boolean walking;
   private final Environment environment;
-  private final BattleHistory battleHistory;
+  private static CallStatus status = CallStatus.DEFAULT;
+  private static int timeOfPatrolling;
+  private static MapCell currentCP;
 
-  public CannotFindEnemyAnalysis(Environment environment, BattleHistory battleHistory) {
+  public CannotFindEnemyAnalysis(Environment environment, int timeOfPatrolling) {
     this.environment = environment;
-    this.battleHistory = battleHistory;
+    this.timeOfPatrolling = timeOfPatrolling;
+    constructorTrick();
+  }
+
+  private void constructorTrick() {
+    if (nowIsCommanderMove() && hasEnoughAP()) {
+      if (status == CallStatus.WAITING_FOR_RESPONSE)
+        status = CallStatus.RESPONSE;
+      else if (status == CallStatus.RESPONSE)
+        status = CallStatus.DEFAULT;
+    }
   }
 
   @Override
   public boolean condition() {
     if (nowIsCommanderMove() && hasEnoughAP()) {
-      if (waitingForEnemiesLocations)
+      if (status == CallStatus.RESPONSE)
         return true;
-      if (walking) {
-        if (environment.getRouter().checkPointWasReached()) {
-          walking = false;
+      if (status == CallStatus.WALKING_TO_ENEMY) {
+        if (environment.getRouter().checkPointWasPassed(currentCP)) {
+          status = CallStatus.DEFAULT;
           return false;
+        }
+        if (timeOfPatrolling > 2 * (55 - environment.getMoveIndex())) {
+          status = CallStatus.DEFAULT;
+          timeOfPatrolling = 0;
+          return true;
         }
       } else if (haveNotSeenEnemyForAges())
         return true;
@@ -40,7 +61,7 @@ public class CannotFindEnemyAnalysis implements IAnalysis {
   }
 
   private boolean hasEnoughAP() {
-    return environment.getCurrentTrooper().getActionPoints() == 10;
+    return environment.getCurrentTrooper().getActionPoints() >= 10;
   }
 
   private boolean nowIsCommanderMove() {
@@ -48,23 +69,15 @@ public class CannotFindEnemyAnalysis implements IAnalysis {
   }
 
   private boolean haveNotSeenEnemyForAges() {
-    int count = 0;
-    for (int i = battleHistory.size() - 1; i >= 0; --i) {
-      Environment env = battleHistory.get(i);
-      if (env.getActualEnemies().isEmpty())
-        ++count;
-      else
-        break;
+    if (timeOfPatrolling > 2 * (6 * environment.getMyTeam().count()))
+      return true;
 
-      if (count > 15 * (env.getBattleState().getPlayersTotal() - env.getBattleState().getDeadPlayersCount()))
-        return true;
-    }
     return false;
   }
 
   @Override
   public void doAction() {
-    if (waitingForEnemiesLocations) {
+    if (status == CallStatus.RESPONSE) {
       Player[] players = environment.getWorld().getPlayers();
       ArrayList<MapCell> possibleDestinations = new ArrayList<>();
       for (Player player : players)
@@ -74,17 +87,17 @@ public class CannotFindEnemyAnalysis implements IAnalysis {
           if (x == -1)
             environment.getBattleState().setPlayerDead(player);
           else
-            possibleDestinations.add(new MapCell(environment.getWorld().getWidth(), environment.getBattleMap().getHeight(), x, y));
+            possibleDestinations.add(BattleMap.getMapCellFactory().createMapCell(x, y));
         }
       assert !possibleDestinations.isEmpty();
 
       Router myRouter = environment.getRouter();
-      myRouter.setCheckPoint(chooseClosestCellToUs(environment.getMyTroopers(), possibleDestinations));
+      currentCP = chooseClosestCellToUs(environment.getMyTroopers(), possibleDestinations);
+      myRouter.addCheckPoint(currentCP);
       logger.info("CHOOSING TACTICS: LOOKING FOR THE ENEMY, COMMANDER MADE A CALL -- time to AttACK! ");
-      waitingForEnemiesLocations = false;
-      walking = true;
+      status = CallStatus.WALKING_TO_ENEMY;
     } else
-      waitingForEnemiesLocations = true;
+      status = CallStatus.WAITING_FOR_RESPONSE;
   }
 
   private MapCell chooseClosestCellToUs(ArrayList<TrooperModel> myTroopers, ArrayList<MapCell> possibleDestinations) {
@@ -107,7 +120,7 @@ public class CannotFindEnemyAnalysis implements IAnalysis {
   @Override
   public ITactics getTactics() {
     logger.info("CHOOSING TACTICS: LOOKING FOR THE ENEMY, COMMANDER WILL MAKE A CALL ");
-    if (waitingForEnemiesLocations)
+    if (status == CallStatus.WAITING_FOR_RESPONSE)
       return new SearchTactics(environment);
 
     return new PatrolTactics();

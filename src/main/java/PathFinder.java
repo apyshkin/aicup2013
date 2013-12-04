@@ -1,5 +1,8 @@
 import model.World;
 
+import java.util.HashSet;
+import java.util.PriorityQueue;
+
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -52,7 +55,6 @@ public class PathFinder {
     yQueue.reset();
     xQueue.add(xStart);
     yQueue.add(yStart);
-    was[xStart][yStart] = true;
 
     while (!(xQueue.isEmpty() && yQueue.isEmpty())) {
       int cellX = xQueue.poll();
@@ -71,7 +73,7 @@ public class PathFinder {
         if (!cellChecker.cellIsWithinBoundaries(neighCellX, neighCellY))
           continue;
 
-        if (cellChecker.cellIsFree(neighCellX, neighCellY) && !was[neighCellX][neighCellY]) {
+        if (!was[neighCellX][neighCellY] && cellChecker.cellIsFree(neighCellX, neighCellY)) {
           was[neighCellX][neighCellY] = true;
           distances[neighCellX][neighCellY] = distances[cellX][cellY] + 1;
           xQueue.add(neighCellX);

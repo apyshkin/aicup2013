@@ -64,7 +64,7 @@ public class ThrowGrenadeActionChecker extends ActionChecker {
   }
 
   private ArrayList<TrooperModel> getTroopersNearby(int x, int y) {
-    ArrayList<TrooperModel> troopers = environment.getEnemies();
+    ArrayList<TrooperModel> troopers = environment.getVisibleTroopers();
     ArrayList<TrooperModel> answer = new ArrayList<>();
     for (TrooperModel trooper : troopers)
       if ((Math.abs(trooper.getX() - x) + Math.abs(trooper.getY() - y)) <= 1)

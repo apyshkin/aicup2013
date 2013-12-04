@@ -21,21 +21,26 @@ public abstract class TrooperStrategyAdapter implements ITrooperStrategy {
 
   @Override
   public ActionSequence findOptimalActions(AttackTactics tactics) {
-    return findOptimalActions(countPriorities(getAttackCoefficients()));
+    return findOptimalActions(countPriorities(getAttackPriorityCoeff()), countPotentials(getAttackPotentialCoeff()));
   }
 
   @Override
   public ActionSequence findOptimalActions(PatrolTactics tactics) {
-    return findOptimalActions(countPriorities(getPatrolCoefficients()));
+    return findOptimalActions(countPriorities(getPatrolPriorityCoeff()), countPotentials(getPatrolPotentialCoeff()));
   }
 
-  public ActionSequence findOptimalActions(CellPriorities priorities) {
+  public ActionSequence findOptimalActions(CellPriorities priorities, IPathPotential[] potentials) {
     IActionsGenerator actionsGenerator = createActionsGenerator();
-    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, actionsGenerator);
+    TrooperAlgorithmChooser algorithmChooser = new TrooperAlgorithmChooser(environment, trooper, priorities, potentials, actionsGenerator);
     return algorithmChooser.findBestSequence();
   }
 
-  protected CellPriorities countPriorities(CoefficientPack coefficientPack) {
+  private IPathPotential[] countPotentials(PotentialCoeffPack potentialCoeffPack) {
+    PathPotentialCalculator pathPotentialCalculator = new PathPotentialCalculator(environment, trooper, potentialCoeffPack);
+    return pathPotentialCalculator.getPotentials();
+  }
+
+  protected CellPriorities countPriorities(PriorityCoeffPack coefficientPack) {
     PriorityWeightsFactory weightsFactory = new PriorityWeightsFactory(environment, trooper);
     List<PriorityWeight> weightList = weightsFactory.createPriorityWeightsList(coefficientPack);
     PriorityCalculator priorityCalculator = new PriorityCalculator(environment, trooper, weightList);
@@ -43,6 +48,8 @@ public abstract class TrooperStrategyAdapter implements ITrooperStrategy {
   }
 
   protected abstract IActionsGenerator createActionsGenerator();
-  protected abstract CoefficientPack getAttackCoefficients();
-  protected abstract CoefficientPack getPatrolCoefficients();
+  protected abstract PriorityCoeffPack getAttackPriorityCoeff();
+  protected abstract PriorityCoeffPack getPatrolPriorityCoeff();
+  protected abstract PotentialCoeffPack getAttackPotentialCoeff();
+  protected abstract PotentialCoeffPack getPatrolPotentialCoeff();
 }

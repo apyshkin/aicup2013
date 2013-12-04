@@ -23,16 +23,14 @@ public class IsUnderAttackAnalysis implements IAnalysis {
 
   @Override
   public boolean condition() {
-    return  wasAttackedSinceLastMove();
+    return wasAttackedSinceLastMove();
   }
 
   private boolean wasAttackedSinceLastMove() {
     int size = battleHistory.size();
-    if (size < 2)
-      return false;
 
     int teamSize = environment.getMyTeam().count();
-    for (int i = 0; i < teamSize && i + 1 < size; ++i) {
+    for (int i = 0; i < 1 && i + 1 < size; ++i) {
       Environment environment1 = battleHistory.get(size - 1 - i);
       Environment environment2 = battleHistory.get(size - 1 - i - 1);
       int summaryHP = countSummaryHP(environment1.getWorld().getTroopers());
@@ -47,7 +45,9 @@ public class IsUnderAttackAnalysis implements IAnalysis {
   private int countSummaryHP(Trooper[] troopers) {
     int sum = 0;
     for (Trooper trooper : troopers)
-      sum += trooper.getHitpoints();
+      if (trooper.isTeammate())
+        sum += trooper.getHitpoints();
+
     return sum;
   }
 
@@ -59,19 +59,22 @@ public class IsUnderAttackAnalysis implements IAnalysis {
   }
 
   private void tryToFindAndKill() {
-    assert (environment.getActualEnemies().isEmpty());
-    int width = environment.getWorld().getWidth();
-    int height = environment.getWorld().getHeight();
-    ArrayList <TrooperModel> enemies = environment.getEnemies();
+    assert (!environment.getEnemies().isEmpty());
+    ArrayList<TrooperModel> enemies = environment.getEnemies();
     ArrayList<TrooperModel> myTroopers = environment.getMyTroopers();
     if (environment.getCurrentTime() > 6 && (enemies.size() < myTroopers.size())
             || countSummaryHP(enemies) < 0.7 * countSummaryHP(myTroopers)) {
-      final TrooperModel enemyClosestToUs = getEnemyClosestToUs(myTroopers, enemies);
-      environment.getRouter().setCheckPoint(new MapCell(width, height, enemyClosestToUs.getX(), enemyClosestToUs.getY()));
+      final TrooperModel enemyClosestToUs = getMostActualEnemyClosestToUs(myTroopers, enemies);
+      environment.getRouter().setCheckPoint(BattleMap.getMapCellFactory().createMapCell(enemyClosestToUs.getX(), enemyClosestToUs.getY()));
     }
   }
 
-  private TrooperModel getEnemyClosestToUs(ArrayList<TrooperModel> myTroopers, ArrayList<TrooperModel> enemies) {
+  private TrooperModel getMostActualEnemyClosestToUs(ArrayList<TrooperModel> myTroopers, ArrayList<TrooperModel> enemies) {
+    ArrayList<TrooperModel> mostActualEnemies = getMostActualEnemies(enemies);
+    return getClosestEnemy(myTroopers, mostActualEnemies);
+  }
+
+  private TrooperModel getClosestEnemy(ArrayList<TrooperModel> myTroopers, ArrayList<TrooperModel> enemies) {
     int minDist = Utils.INFINITY;
     TrooperModel closestEnemy = null;
     for (TrooperModel enemy : enemies) {
@@ -84,39 +87,58 @@ public class IsUnderAttackAnalysis implements IAnalysis {
         minDist = sumDist;
       }
     }
+    assert closestEnemy != null;
     return closestEnemy;
   }
 
-  @Override
-  public void doAction() {
-    addEnemyToBattleMap(battleHistory);
-    tryToFindAndKill();
+  private ArrayList<TrooperModel> getMostActualEnemies(ArrayList<TrooperModel> enemies) {
+    ArrayList<TrooperModel> actualEnemies = new ArrayList<>();
+    int minActuality = Utils.INFINITY;
+    for (TrooperModel enemy : enemies) {
+      int actuality = environment.getBattleMap().getActuality(enemy, environment.getCurrentTime());
+      if (actuality < minActuality) {
+        actualEnemies.clear();
+        minActuality = actuality;
+        actualEnemies.add(enemy);
+      } else if (actuality == minActuality) {
+        actualEnemies.add(enemy);
+      }
+    }
+    return actualEnemies;
   }
 
   private void addEnemyToBattleMap(BattleHistory battleHistory) {
-    assert (battleHistory.size() > 1);
     assert (environment.getActualEnemies().isEmpty());
-
-    Environment last = battleHistory.getLast();
-    Environment oneBeforeLast = battleHistory.get(battleHistory.size() - 2);
+    int size = battleHistory.size();
 
     TrooperModel suffered = null;
-    for (TrooperModel oldTrooper : oneBeforeLast.getMyTroopers()) {
-      boolean found = false;
-      for (TrooperModel trooper : last.getMyTroopers())
-        if (trooper.getType() == oldTrooper.getType()) {
-          found = true;
-          if (trooper.getHitpoints() < oldTrooper.getHitpoints())
-            suffered = oldTrooper;
+    for (int i = 0; i < 1 && i + 1 < size; ++i) {
+      Environment environment1 = battleHistory.get(size - 1 - i - 1);
+      Environment environment2 = battleHistory.get(size - 1 - i);
+      for (Trooper trooper1 : environment1.getWorld().getTroopers())
+        if (trooper1.isTeammate()) {
+          boolean found = false;
+          for (Trooper trooper2 : environment2.getWorld().getTroopers())
+            if (trooper2.isTeammate()) {
+              if (trooper2.getType() == trooper1.getType() && trooper1.getPlayerId() == trooper2.getPlayerId()) {
+                found = true;
+                if (trooper1.getHitpoints() > trooper2.getHitpoints()) {
+                  suffered = environment.getMyTeam().getMyTrooper(trooper1.getType());
+                }
+              }
+            }
+          if (!found) {
+            suffered = new TrooperModel(trooper1);
+          }
         }
-      if (!found)
-        suffered = oldTrooper;
+      if (suffered != null)
+        break;
     }
-    if (suffered == null)
-      return;
-
+    assert suffered != null;
     MapCell closestCell = findEnemyLocation(battleHistory, suffered);
+    assert closestCell != null;
     environment.putEnemy(createEnemy(closestCell.getX(), closestCell.getY()));
+    return;
   }
 
   private MapCell findEnemyLocation(BattleHistory history, TrooperModel suffered) {
@@ -135,9 +157,12 @@ public class IsUnderAttackAnalysis implements IAnalysis {
       if (minDist > suffered.getDistanceTo(enemy.getX(), enemy.getY())) {
         minDist = suffered.getDistanceTo(enemy.getX(), enemy.getY());
         best = enemy;
+        logger.info("Found best enemy " + enemy);
       }
     }
-    return best;
+    if (minDist < 5)
+      return best;
+    return null;
   }
 
   private MapCell getCellClosestToTrooper(TrooperModel suffered) {
@@ -148,10 +173,10 @@ public class IsUnderAttackAnalysis implements IAnalysis {
       for (int j = 0; j < environment.getWorld().getHeight(); ++j)
         if (environment.getCellChecker().cellIsFree(i, j)
                 && suffered.getDistanceTo(i, j) < minDist - 0.001
-                && environment.getBattleMap().isVisibleFrom(i, j, suffered)
+//                && environment.getBattleMap().isVisibleFrom(i, j, suffered)
                 && !environment.getBattleMap().checkVisibility(myTroopers, i, j, TrooperStance.STANDING)) {
           minDist = suffered.getDistanceTo(i, j);
-          closestCell = new MapCell(environment.getBattleMap().getWidth(), environment.getBattleMap().getHeight(), i, j);
+          closestCell = BattleMap.getMapCellFactory().createMapCell(i, j);
         }
     return closestCell;
   }
@@ -165,6 +190,12 @@ public class IsUnderAttackAnalysis implements IAnalysis {
     enemy.setY(y);
     enemy.turnToEnemy();
     return enemy;
+  }
+
+  @Override
+  public void doAction() {
+    addEnemyToBattleMap(battleHistory);
+    tryToFindAndKill();
   }
 
   @Override

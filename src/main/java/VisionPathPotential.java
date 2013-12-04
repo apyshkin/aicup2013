@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 /**
  * Created with IntelliJ IDEA.
  * User: alexeyka
@@ -7,12 +5,13 @@ import java.util.ArrayList;
  * Time: 2:58 AM
  * To change this template use File | Settings | File Templates.
  */
-public class VisionPotential implements IPotential {
+public class VisionPathPotential implements IPathPotential {
   private final Environment environment;
   private final TrooperModel trooper;
   private int[][][] visibilities;
+  private int coeff;
 
-  public VisionPotential(Environment environment, TrooperModel trooper) {
+  public VisionPathPotential(Environment environment, TrooperModel trooper) {
     this.environment = environment;
     this.trooper = trooper;
     init();
@@ -22,8 +21,9 @@ public class VisionPotential implements IPotential {
   }
 
   @Override
-  public void preCount(boolean[][] reachableCells) {
+  public void preCount(boolean[][] reachableCells, int coeff) {
     final BattleMap battleMap = environment.getBattleMap();
+    this.coeff = coeff;
     visibilities = new int[battleMap.getWidth()][battleMap.getHeight()][3];
     int curVisibility = countVisibility();
     TrooperMemorizer memorizer = new TrooperMemorizer(trooper);
@@ -33,7 +33,7 @@ public class VisionPotential implements IPotential {
         for (int s = 0; s < 3; ++s) {
           if (reachableCells[i][j]) {
             trooper.move(i, j, Utils.getStance(s));
-            visibilities[i][j][s] = countVisibility() - curVisibility;
+            visibilities[i][j][s] = coeff * (countVisibility() - curVisibility);
           }
         }
 
@@ -62,4 +62,15 @@ public class VisionPotential implements IPotential {
   public int getPotential(int x, int y, int stance) {
     return visibilities[x][y][stance];
   }
+
+  @Override
+  public int countNewPathPoints(int currentPathPotential, int newPositionPotential) {
+    return Math.max(currentPathPotential, newPositionPotential);
+  }
+
+  @Override
+  public String toString() {
+    return "Potential for " + this.getClass().getSimpleName() + " : coefficient = " + coeff;
+  }
+
 }
